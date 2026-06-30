@@ -17,7 +17,6 @@ dependencies = [
   "mem0ai>=1.0.1",
   "agno>=2.3.0",
   "mcp>=1.27.0",
-  "kerykeion>=4.11",
 ]
 
 [project.scripts]
@@ -32,6 +31,11 @@ namespaces = true
 "sacred_brain.prompts" = ["*.txt"]
 
 [project.optional-dependencies]
+# NB: kerykeion (Swiss Ephemeris / pyswisseph C build) is intentionally NOT a
+# dependency here. Astrology/natal computation belongs to the *astrotunes*
+# project, which owns kerykeion; sacred-brain's astrology code (memory_governor
+# oracle, scripts/natal_to_sacred_brain) should delegate there. The hippocampus
+# core needs none of it (the sqlite backend is lexical — no embeddings/LLM).
 dev = [
   "pytest>=7.4",
   "ruff>=0.3.0",
