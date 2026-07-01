@@ -36,19 +36,29 @@ class HippocampusClient:
         return headers
 
     async def _rerank(self, query: str, candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Reorder candidates by LLM relevance. Robust: asks the model for an
+        index ORDER and reorders the ORIGINAL objects (never trusts the model to
+        echo objects back). Returns the original order on any failure / when
+        disabled, so callers can use it unconditionally."""
         if not (self.rerank_enabled and self.litellm_base_url and self.rerank_model and candidates):
             return candidates
         import json as _json
+        import re as _re
 
+        pool = candidates[: self.rerank_max]
+        listing = "\n".join(
+            f"[{i}] {(c.get('text') or c.get('memory') or '')[:300]}"
+            for i, c in enumerate(pool)
+        )
         prompt = (
-            "Reorder the following memories by relevance to the query. "
-            "Return JSON array of the memory objects, unchanged, just reordered.\n"
-            f"Query: {query}\n"
-            f"Memories: {_json.dumps(candidates[: self.rerank_max], ensure_ascii=False)}"
+            "Rank these memories by relevance to the query, most relevant first. "
+            "Return ONLY a JSON array of their integer indices, each exactly once.\n"
+            f"Query: {query}\nMemories:\n{listing}"
         )
         payload = {
             "model": self.rerank_model,
             "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0,
         }
         headers = {"Content-Type": "application/json"}
         if self.litellm_api_key:
@@ -62,11 +72,22 @@ class HippocampusClient:
                     headers=headers,
                 )
                 resp.raise_for_status()
-                data = resp.json()
-                content = data["choices"][0]["message"]["content"]
-                parsed = _json.loads(content)
-                if isinstance(parsed, list):
-                    return parsed
+                content = resp.json()["choices"][0]["message"]["content"]
+                match = _re.search(r"\[[\d,\s]*\]", content)
+                order = _json.loads(match.group(0) if match else content)
+                seen: set[int] = set()
+                ranked: list[dict[str, Any]] = []
+                for idx in order:
+                    if isinstance(idx, int) and 0 <= idx < len(pool) and idx not in seen:
+                        ranked.append(pool[idx])
+                        seen.add(idx)
+                # Safety: append any pool items the model omitted, then the tail
+                # beyond rerank_max, so no candidate is ever dropped.
+                for i, cand in enumerate(pool):
+                    if i not in seen:
+                        ranked.append(cand)
+                ranked.extend(candidates[self.rerank_max:])
+                return ranked
         except Exception as exc:
             LOGGER.warning("Rerank failed, using original order: %s", exc)
         return candidates
