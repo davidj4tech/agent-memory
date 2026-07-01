@@ -8,6 +8,9 @@ Type=simple
 User=sacred
 Group=sacred
 EnvironmentFile=/etc/sacred-brain/memory-governor.env
+# Shared API keys (LITELLM_API_KEY, HIPPOCAMPUS_API_KEY) rendered from the sops
+# secrets store; optional (-), loaded second so it wins. No key literals above.
+EnvironmentFile=-/etc/sacred-brain/secrets.env
 ExecStart=/usr/local/bin/memory-governor
 Restart=always
 RestartSec=3

@@ -5,6 +5,9 @@ After=network.target
 [Service]
 Type=simple
 EnvironmentFile=/etc/sacred-brain/hippocampus.env
+# Shared API keys rendered from the sops secrets store; optional (-), loaded
+# second so it wins where keys overlap. No key literals in the file above.
+EnvironmentFile=-/etc/sacred-brain/secrets.env
 ExecStart=/usr/local/bin/hippocampus
 Restart=on-failure
 User=sacred
