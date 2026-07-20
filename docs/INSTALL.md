@@ -1,5 +1,11 @@
 # Installing Sacred Brain
 
+> **Two install models.** This document covers the packaged, system-wide model
+> (`/opt/agent-memory`, `/etc`, `/var/lib`, a `sacred` service user, root).
+> For the unprivileged single-user model the live `red5` box runs — a clone at
+> `~/projects/agent-memory`, a per-user pipx venv, and `systemctl --user`
+> units — see [INSTALL_USER.md](INSTALL_USER.md). Pick one model per host.
+
 ## Prerequisites
 
 - Linux with systemd (Debian/Ubuntu/Raspberry Pi OS)

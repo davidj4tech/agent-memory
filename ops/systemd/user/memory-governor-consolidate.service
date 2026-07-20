@@ -1,0 +1,9 @@
+[Unit]
+Description=Memory Governor consolidation run (user)
+After=memory-governor.service
+Requires=memory-governor.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=%h/.config/sacred-brain/memory-governor.env
+ExecStart=%h/.local/bin/memory-governor-consolidate
