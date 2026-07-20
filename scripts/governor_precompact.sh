@@ -21,9 +21,9 @@ for f in "$HOME/.config/hippocampus.env" "$HOME/.config/sacred-brain.env"; do
   fi
 done
 
-GOVERNOR_URL="${GOVERNOR_URL:-${HIPPOCAMPUS_URL:-http://127.0.0.1:54323}}"
-API_KEY="${GOVERNOR_API_KEY:-${HIPPOCAMPUS_API_KEY:-}}"
-USER_ID="${GOVERNOR_USER_ID:-sam}"
+GOVERNOR_URL="${AGENT_MEMORY_GOVERNOR_URL:-${GOVERNOR_URL:-${HIPPOCAMPUS_URL:-http://127.0.0.1:54323}}}"
+API_KEY="${AGENT_MEMORY_API_KEY:-${GOVERNOR_API_KEY:-${HIPPOCAMPUS_API_KEY:-}}}"
+USER_ID="${AGENT_MEMORY_USER_ID:-${GOVERNOR_USER_ID:-sam}}"
 PROJECT="$(basename "$PWD")"
 
 # Hook input: either a JSON object on stdin, or CLAUDE_TRANSCRIPT env, or $1

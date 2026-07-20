@@ -14,7 +14,7 @@ Examples:
 
     # ...then --post when the dry-run looks right.
 
-Reads HIPPOCAMPUS_URL / HIPPOCAMPUS_API_KEY from env or ~/.config/hippocampus.env.
+Reads AGENT_MEMORY_HIPPOCAMPUS_URL / AGENT_MEMORY_API_KEY or legacy HIPPOCAMPUS_URL / HIPPOCAMPUS_API_KEY from env or ~/.config/hippocampus.env.
 """
 from __future__ import annotations
 
@@ -270,20 +270,20 @@ def memory_payloads(chart: dict, who: dict) -> list[dict]:
 
 def post_to_hippocampus(payloads: list[dict], user_id: str) -> None:
     import urllib.request
-    url = os.environ.get("HIPPOCAMPUS_URL", "http://127.0.0.1:54321") + "/memories"
-    api_key = os.environ.get("HIPPOCAMPUS_API_KEY", "")
+    url = (os.environ.get("AGENT_MEMORY_HIPPOCAMPUS_URL") or os.environ.get("HIPPOCAMPUS_URL", "http://127.0.0.1:54321")) + "/memories"
+    api_key = os.environ.get("AGENT_MEMORY_API_KEY") or os.environ.get("HIPPOCAMPUS_API_KEY", "")
     if not api_key:
         # Try loading from ~/.config/hippocampus.env
         env_path = os.path.expanduser("~/.config/hippocampus.env")
         if os.path.exists(env_path):
             for line in open(env_path):
                 line = line.strip()
-                if line.startswith("HIPPOCAMPUS_API_KEY="):
+                if line.startswith("AGENT_MEMORY_API_KEY=") or line.startswith("HIPPOCAMPUS_API_KEY="):
                     api_key = line.split("=", 1)[1]
-                if line.startswith("HIPPOCAMPUS_URL="):
+                if line.startswith("AGENT_MEMORY_HIPPOCAMPUS_URL=") or line.startswith("HIPPOCAMPUS_URL="):
                     url = line.split("=", 1)[1].rstrip("/") + "/memories"
     if not api_key:
-        sys.exit("HIPPOCAMPUS_API_KEY not set and not in ~/.config/hippocampus.env")
+        sys.exit("AGENT_MEMORY_API_KEY/HIPPOCAMPUS_API_KEY not set and not in ~/.config/hippocampus.env")
     for i, p in enumerate(payloads, 1):
         body = json.dumps({"user_id": user_id, "text": p["text"],
                            "metadata": p["metadata"]}).encode()

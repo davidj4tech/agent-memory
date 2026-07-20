@@ -7,9 +7,9 @@ by content hash — only new or changed lines are pushed.
 
 Environment:
   MEMORY_SYNC_ROOT     source directory containing MEMORY.md and/or memory/ subdir (required)
-  HIPPOCAMPUS_URL      default http://127.0.0.1:54321
-  HIPPOCAMPUS_API_KEY  required when Hippocampus auth is enabled
-  HIPPOCAMPUS_USER_ID  default "default"
+  AGENT_MEMORY_HIPPOCAMPUS_URL or HIPPOCAMPUS_URL  default http://127.0.0.1:54321
+  AGENT_MEMORY_API_KEY or HIPPOCAMPUS_API_KEY      required when auth is enabled
+  AGENT_MEMORY_USER_ID or HIPPOCAMPUS_USER_ID      default "default"
   HIPPOCAMPUS_SQLITE_PATH  for local dedup (default: /var/lib/sacred-brain/hippocampus/hippocampus_memories.sqlite)
 
 Usage:
@@ -102,9 +102,9 @@ def main() -> int:
         print(f"Error: MEMORY_SYNC_ROOT={root} is not a directory", file=sys.stderr)
         return 2
 
-    base = os.environ.get("HIPPOCAMPUS_URL", "http://127.0.0.1:54321").rstrip("/")
-    api_key = os.environ.get("HIPPOCAMPUS_API_KEY")
-    user_id = os.environ.get("HIPPOCAMPUS_USER_ID", "default")
+    base = (os.environ.get("AGENT_MEMORY_HIPPOCAMPUS_URL") or os.environ.get("HIPPOCAMPUS_URL", "http://127.0.0.1:54321")).rstrip("/")
+    api_key = os.environ.get("AGENT_MEMORY_API_KEY") or os.environ.get("HIPPOCAMPUS_API_KEY")
+    user_id = os.environ.get("AGENT_MEMORY_USER_ID") or os.environ.get("HIPPOCAMPUS_USER_ID", "default")
     db_path = os.environ.get("HIPPOCAMPUS_SQLITE_PATH", DEFAULT_DB)
 
     headers: dict[str, str] = {"content-type": "application/json"}
@@ -145,7 +145,7 @@ def main() -> int:
         }
         resp = requests.post(f"{base}/memories", json=payload, headers=headers, timeout=15)
         if resp.status_code == 401:
-            raise SystemExit("Hippocampus returned 401. Set HIPPOCAMPUS_API_KEY.")
+            raise SystemExit("Hippocampus returned 401. Set AGENT_MEMORY_API_KEY/HIPPOCAMPUS_API_KEY.")
         resp.raise_for_status()
         existing.add(h)
         pushed += 1

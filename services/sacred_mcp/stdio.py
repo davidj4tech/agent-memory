@@ -4,10 +4,10 @@ Runs as a sub-process under an MCP-speaking agent (Claude Desktop, Claude Code,
 Cursor, etc.). Binds a persona via env so tool calls can omit `user_id`.
 
 Env:
-  SACRED_MCP_HIPPOCAMPUS_URL   — default http://127.0.0.1:54321
-  SACRED_MCP_GOVERNOR_URL      — default http://127.0.0.1:54323
-  SACRED_MCP_API_KEY           — shared with X-API-Key auth
-  SACRED_MCP_DEFAULT_USER_ID   — persona bound to this instance (e.g. "sam")
+  AGENT_MEMORY_HIPPOCAMPUS_URL or SACRED_MCP_HIPPOCAMPUS_URL   — default http://127.0.0.1:54321
+  AGENT_MEMORY_GOVERNOR_URL or SACRED_MCP_GOVERNOR_URL          — default http://127.0.0.1:54323
+  AGENT_MEMORY_API_KEY or SACRED_MCP_API_KEY                    — shared with X-API-Key auth
+  AGENT_MEMORY_USER_ID or SACRED_MCP_DEFAULT_USER_ID            — persona bound to this instance (e.g. "sam")
 
 For HIPPOCAMPUS_URL / HIPPOCAMPUS_API_KEY compatibility with the existing
 `~/.config/hippocampus.env`, those names are honoured as fallbacks.
@@ -30,25 +30,32 @@ from services.sacred_mcp.handlers import (
 
 def _load_config() -> SacredBrainConfig:
     hippocampus_url = (
-        os.environ.get("SACRED_MCP_HIPPOCAMPUS_URL")
+        os.environ.get("AGENT_MEMORY_HIPPOCAMPUS_URL")
+        or os.environ.get("SACRED_MCP_HIPPOCAMPUS_URL")
         or os.environ.get("HIPPOCAMPUS_URL")
         or "http://127.0.0.1:54321"
     )
     governor_url = (
-        os.environ.get("SACRED_MCP_GOVERNOR_URL")
+        os.environ.get("AGENT_MEMORY_GOVERNOR_URL")
+        or os.environ.get("SACRED_MCP_GOVERNOR_URL")
         or os.environ.get("GOVERNOR_URL")
         or "http://127.0.0.1:54323"
     )
     api_key = (
-        os.environ.get("SACRED_MCP_API_KEY")
+        os.environ.get("AGENT_MEMORY_API_KEY")
+        or os.environ.get("SACRED_MCP_API_KEY")
         or os.environ.get("HIPPOCAMPUS_API_KEY")
     )
     default_user_id = (
-        os.environ.get("SACRED_MCP_DEFAULT_USER_ID")
+        os.environ.get("AGENT_MEMORY_USER_ID")
+        or os.environ.get("SACRED_MCP_DEFAULT_USER_ID")
         or os.environ.get("HIPPOCAMPUS_USER_ID")
         or os.environ.get("GOVERNOR_USER_ID")
     )
-    default_write_user_id = os.environ.get("SACRED_MCP_DEFAULT_WRITE_USER_ID")
+    default_write_user_id = (
+        os.environ.get("AGENT_MEMORY_WRITE_USER_ID")
+        or os.environ.get("SACRED_MCP_DEFAULT_WRITE_USER_ID")
+    )
     return SacredBrainConfig(
         hippocampus_url=hippocampus_url,
         governor_url=governor_url,
