@@ -23,7 +23,7 @@ from typing import Any
 
 import httpx
 
-REM_MODEL = "claude-haiku-4-5-20251001"
+REM_MODEL = "claude-opus-4-8-liberated"
 REM_MAX_TOKENS = 1024
 REM_TIMEOUT_S = 30.0
 
@@ -93,21 +93,43 @@ def gather_rem_inputs(
     since_hours: int = 24,
     top_k: int = 20,
     now_ts: float | None = None,
+    exclude_ids: set[str] | None = None,
+    text_by_id: dict[str, str] | None = None,
 ) -> RemInputs:
-    """Assemble REM inputs. Read-only on the memory store."""
+    """Assemble REM inputs. Read-only on the memory store.
+
+    exclude_ids: memory ids to drop from promotions + top-recalled (e.g. selftest
+    canary seeds), so the reflection doesn't fixate on non-real memories.
+    text_by_id: memory id -> text, so top-recalled/promoted rows carry content
+    (the reflection can reason about themes, not just UUIDs).
+    """
     now = int(now_ts if now_ts is not None else time.time())
     cutoff = now - since_hours * 3600
+    exclude = set(exclude_ids or ())
 
     stream_events = _read_stream_since(stream_log_path, cutoff) if stream_log_path else []
 
     promoted_today: list[dict[str, Any]] = []
     if hasattr(store, "dreamed_within"):
         for mem_id in store.dreamed_within(cutoff):
+            if mem_id in exclude:
+                continue
             row = store.get_dream_promotion(mem_id)
             if row:
                 promoted_today.append(row)
 
-    top_recalled = store.top_recalled(limit=top_k) if hasattr(store, "top_recalled") else []
+    top_recalled = []
+    if hasattr(store, "top_recalled"):
+        # Over-fetch so excluded ids don't shrink the list below top_k.
+        rows = store.top_recalled(limit=top_k + len(exclude))
+        top_recalled = [r for r in rows if r.get("memory_id") not in exclude][:top_k]
+
+    if text_by_id:
+        def _add_text(row):
+            mid = row.get("memory_id")
+            return {**row, "text": text_by_id[mid]} if mid in text_by_id else row
+        promoted_today = [_add_text(r) for r in promoted_today]
+        top_recalled = [_add_text(r) for r in top_recalled]
 
     return RemInputs(
         stream_events=stream_events,
@@ -138,11 +160,18 @@ def _summarise_promotions(rows: list[dict[str, Any]]) -> str:
     rows = sorted(rows, key=lambda r: r.get("last_score", 0.0), reverse=True)
     lines = []
     for r in rows:
-        lines.append(
-            f"- {r.get('memory_id','?')} score={r.get('last_score',0.0):.3f} "
-            f"count={r.get('dream_count',0)}"
-        )
+        line = (f"- {r.get('memory_id','?')} score={r.get('last_score',0.0):.3f} "
+                f"count={r.get('dream_count',0)}")
+        lines.append(line + _text_suffix(r))
     return "\n".join(lines)
+
+
+def _text_suffix(row: dict[str, Any], limit: int = 160) -> str:
+    """`:: <snippet>` if the row carries memory text, else ''."""
+    txt = (row.get("text") or "").replace("\n", " ").strip()
+    if not txt:
+        return ""
+    return " :: " + ((txt[:limit] + "…") if len(txt) > limit else txt)
 
 
 def _summarise_top_recalled(rows: list[dict[str, Any]]) -> str:
@@ -150,7 +179,8 @@ def _summarise_top_recalled(rows: list[dict[str, Any]]) -> str:
         return "(none)"
     lines = []
     for r in rows:
-        lines.append(f"- {r.get('memory_id','?')} recalls={r.get('recall_count',0)}")
+        line = f"- {r.get('memory_id','?')} recalls={r.get('recall_count',0)}"
+        lines.append(line + _text_suffix(r))
     return "\n".join(lines)
 
 

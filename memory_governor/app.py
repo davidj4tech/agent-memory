@@ -337,10 +337,16 @@ async def outcome(payload: OutcomeRequest) -> OutcomeResponse:
 
 @app.post("/recall", response_model=RecallResponse)
 async def recall(payload: RecallRequest) -> RecallResponse:
+    # Fetch a wider pool than k when reranking, so the reranker can pick the best k.
+    fetch_limit = (
+        max(payload.k, runtime.hippo.rerank_max)
+        if runtime.hippo.rerank_enabled
+        else payload.k
+    )
     memories = await runtime.hippo.query_memories(
         user_id=payload.user_id,
         query=payload.query,
-        limit=payload.k,
+        limit=fetch_limit,
     )
     filter_scope_path: str | None = None
     if payload.filters.scope is not None:
@@ -432,21 +438,26 @@ async def recall(payload: RecallRequest) -> RecallResponse:
 
     scored = [(item, _score(item)) for item in filtered]
     scored.sort(key=lambda pair: pair[1], reverse=True)
-    top = scored[: payload.k]
+    score_by_id = {item.get("memory_id"): s for item, s in scored}
+
+    # Optional LLM rerank over the deterministically-sorted pool, then take k.
+    # _rerank returns the original order unchanged when disabled or on error.
+    ordered_items = await runtime.hippo._rerank(payload.query, [item for item, _s in scored])
+    top_items = ordered_items[: payload.k]
 
     query_hash = (
         hashlib.sha1(payload.query.strip().lower().encode("utf-8")).hexdigest()[:16]
         if payload.query.strip()
         else None
     )
-    for item, item_score in top:
+    for item in top_items:
         mid = item.get("memory_id")
         if mid:
-            runtime.enqueue_recall_hit(mid, query_hash=query_hash, rerank_score=item_score)
+            runtime.enqueue_recall_hit(mid, query_hash=query_hash, rerank_score=score_by_id.get(mid))
 
     results = [
         {k: v for k, v in item.items() if k not in ("memory_id", "scope_path", "last_outcome")}
-        for item, _s in top
+        for item in top_items
     ]
     return RecallResponse(results=results)
 

@@ -1,3 +1,31 @@
+# Unreleased
+
+## Installer — conventional pipx + Makefile
+
+Sacred Brain is now installed as a proper Python package via `pipx`, driven by
+a Makefile that honors `DESTDIR` / `PREFIX` / `SYSCONFDIR`.
+
+- `pyproject.toml` ships console-script entry points: `hippocampus` (runs the
+  FastAPI app via uvicorn) and `memory-governor` (runs `memory_governor.app:run`).
+  Packages cover `brain.*`, `memory_governor.*`, and `sacred_brain.*`, including
+  `sacred_brain/prompts/sam_system.txt` as package data.
+- New `Makefile` with `install`, `install-update`, `uninstall`, and
+  `uninstall-purge` targets. `make install` runs `pipx install --force .` into
+  `/opt/pipx/venvs/sacred-brain-hippocampus/` and symlinks the entry-point
+  binaries into `$(PREFIX)/bin/`.
+- Systemd units now point at `/usr/local/bin/hippocampus` and
+  `/usr/local/bin/memory-governor` instead of an in-tree `.venv`. Timer-target
+  scripts use `/opt/pipx/venvs/sacred-brain-hippocampus/bin/python`.
+- Migration: `make install` auto-detects and removes any pre-existing
+  `/opt/sacred-brain/.venv/` from the old in-tree-venv layout. Idempotent.
+- `scripts/install.sh` is now a thin shim that exec's the Makefile, so existing
+  automation that calls `./scripts/install.sh [--update|--uninstall]` keeps
+  working.
+- `sacred-search` is now installed by the Makefile to `$(PREFIX)/bin/`.
+- Earlier in this cycle: skipped service start when configs contain `CHANGE_ME`,
+  switched to globbed unit discovery in `ops/systemd/`, added `--uninstall` /
+  `--uninstall --purge`, and added a `shellcheck` GitHub Actions workflow.
+
 # v0.3.0 (2026-02-15)
 
 ## Restructuring

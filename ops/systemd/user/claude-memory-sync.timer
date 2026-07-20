@@ -1,0 +1,9 @@
+[Unit]
+Description=Hourly Claude memory -> Sacred Brain sync
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+
+[Install]
+WantedBy=timers.target

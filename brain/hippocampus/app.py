@@ -131,12 +131,17 @@ def create_app(settings: HippocampusSettings | None = None) -> FastAPI:
     @application.get("/memories/{user_id}", response_model=MemoryQueryResponse)
     async def query_memories(
         user_id: str,
-        query: str = Query(..., min_length=1),
-        limit: int | None = Query(None, ge=1, le=100),
+        query: str | None = Query(None),
+        limit: int | None = Query(None, ge=1, le=1000),
         adapter: Mem0Adapter = Depends(get_adapter),
         _: None = Depends(auth_dependency),
     ) -> MemoryQueryResponse:
-        records = adapter.query_memories(user_id=user_id, query=query, limit=limit)
+        # query present -> semantic search; absent -> list all (dreaming /
+        # governor recall-fallback need list-all, which used to 422).
+        if query and query.strip():
+            records = adapter.query_memories(user_id=user_id, query=query, limit=limit)
+        else:
+            records = adapter.list_memories(user_id=user_id, limit=limit)
         return MemoryQueryResponse(memories=records)
 
     @application.post("/summaries", response_model=SummaryResponse)

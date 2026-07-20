@@ -1,0 +1,19 @@
+[Unit]
+Description=Sacred Brain Hippocampus (memory store, user service)
+Documentation=https://github.com/davidj4tech/sacred-brain
+After=network.target
+
+[Service]
+Type=simple
+EnvironmentFile=%h/.config/sacred-brain/hippocampus.env
+# Secrets rendered from the sops store by dotfiles-secrets; loaded second so it
+# wins, and optional (-) so the service still starts if it's absent.
+EnvironmentFile=-%h/.config/sacred-brain/secrets.env
+ExecStart=%h/.local/bin/hippocampus
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target
