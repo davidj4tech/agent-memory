@@ -266,3 +266,6 @@ the hourly path in once scoring is proven on real data.
 - Systemd: `ops/systemd/sacred-brain-dream.{service,timer}`
   (OnCalendar `03:00`, runs `dream_sweep.py --apply --reflect` per user
   listed in `MG_DREAM_USERS`, default `sam`)
+- Healthcheck: [`docs/HEALTHCHECK.md`](HEALTHCHECK.md) — hourly watcher over
+  the sweep + `/consolidate`; distinguishes a genuinely stalled/overlooking
+  sweep (hard, alerts) from a quiet idle stream (soft, non-failing notice)

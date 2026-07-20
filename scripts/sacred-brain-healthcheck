@@ -1,0 +1,220 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+from pathlib import Path
+from urllib.parse import quote
+from urllib.request import Request, urlopen
+
+ZERO_STREAK_LIMIT = int(os.environ.get("SB_HEALTH_ZERO_PROMOTION_STREAK", "3"))
+# A zero-promotion streak is only a genuine failure if the sweep had real input to
+# work with. When the cumulative input_event_count across the streak window meets or
+# exceeds this threshold, the sweep is overlooking signal (hard); below it the stream
+# was simply quiet and promoting nothing is correct (soft).
+ZERO_PROMOTION_MIN_INPUTS = int(os.environ.get("SB_HEALTH_ZERO_PROMOTION_MIN_INPUTS", "5"))
+# If the newest dream file is older than this, the sweep itself is likely stalled.
+DREAM_STALE_HOURS = float(os.environ.get("SB_HEALTH_DREAM_STALE_HOURS", "48"))
+JOURNAL_WINDOW = os.environ.get("SB_HEALTH_JOURNAL_WINDOW", "2 hours ago")
+DREAMS_DIR = Path(os.environ.get("DREAMS_OUTPUT_PATH", str(Path.home() / ".local/state/sacred-brain/dreams")))
+STATE_DIR = Path(os.environ.get("MG_STATE_DIR", str(Path.home() / ".local/state/sacred-brain/governor")))
+ALERT_COOLDOWN_SECONDS = int(os.environ.get("SB_HEALTH_ALERT_COOLDOWN_SECONDS", str(6 * 60 * 60)))
+
+
+def run(cmd: list[str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(cmd, text=True, capture_output=True, check=False)
+
+
+def warn(messages: list[tuple[str, str]], message: str, severity: str = "hard") -> None:
+    messages.append((severity, message))
+
+
+def check_user_service(messages: list[str], unit: str) -> None:
+    result = run(["systemctl", "--user", "is-active", unit])
+    if result.stdout.strip() != "active":
+        warn(messages, f"{unit} is not active ({result.stdout.strip() or result.stderr.strip() or 'unknown'})")
+
+
+def check_recent_consolidation(messages: list[str]) -> None:
+    result = run([
+        "journalctl", "--user", "-u", "memory-governor.service",
+        "--since", JOURNAL_WINDOW, "--no-pager", "-o", "cat",
+    ])
+    if result.returncode != 0:
+        warn(messages, f"could not read memory-governor journal: {result.stderr.strip()}")
+        return
+
+    bad = []
+    ok_count = 0
+    for line in result.stdout.splitlines():
+        if 'POST /consolidate' not in line:
+            continue
+        if ' 200 OK' in line:
+            ok_count += 1
+        elif re.search(r'HTTP/1\.1" (4\d\d|5\d\d)', line):
+            bad.append(line.strip())
+
+    if bad:
+        warn(messages, f"recent /consolidate failures in last {JOURNAL_WINDOW}: {len(bad)}; latest: {bad[-1]}")
+    if ok_count == 0:
+        warn(messages, f"no successful /consolidate calls seen in last {JOURNAL_WINDOW}")
+
+
+def parse_dream_counts(path: Path) -> tuple[int | None, int | None]:
+    """Return (promoted_count, input_event_count) from a dream file's frontmatter."""
+    promoted: int | None = None
+    events: int | None = None
+    try:
+        for line in path.read_text(encoding="utf-8", errors="replace").splitlines()[:20]:
+            match = re.match(r"promoted_count:\s*(\d+)", line)
+            if match:
+                promoted = int(match.group(1))
+                continue
+            match = re.match(r"input_event_count:\s*(\d+)", line)
+            if match:
+                events = int(match.group(1))
+    except OSError:
+        return None, None
+    return promoted, events
+
+
+def check_dream_promotions(messages: list[tuple[str, str]]) -> None:
+    files = sorted(p for p in DREAMS_DIR.glob("*.md") if re.match(r"\d{4}-\d{2}-\d{2}\.md$", p.name))
+    if not files:
+        warn(messages, f"no dream markdown files found in {DREAMS_DIR}")
+        return
+
+    # Staleness: if the sweep has stopped producing files, that is a hard failure
+    # regardless of promotion counts (and must never be masked by the soft path below).
+    newest = files[-1]
+    try:
+        age_hours = (time.time() - newest.stat().st_mtime) / 3600.0
+        if age_hours > DREAM_STALE_HOURS:
+            warn(
+                messages,
+                f"newest dream file {newest.name} is {age_hours:.0f}h old "
+                f"(> {DREAM_STALE_HOURS:.0f}h); dream sweep may be stalled",
+            )
+    except OSError as exc:
+        warn(messages, f"could not stat newest dream file {newest.name}: {exc}")
+
+    recent = files[-ZERO_STREAK_LIMIT:]
+    counts = [(p.name, *parse_dream_counts(p)) for p in recent]
+
+    # Malformed output: missing promoted_count is always a hard failure.
+    missing = [name for name, promoted, _ in counts if promoted is None]
+    if missing:
+        warn(messages, f"dream files missing promoted_count frontmatter: {', '.join(missing)}")
+
+    if len(counts) >= ZERO_STREAK_LIMIT and all(promoted == 0 for _, promoted, _ in counts):
+        names = ", ".join(name for name, _, _ in counts)
+        total_inputs = sum(events or 0 for _, _, events in counts)
+        if total_inputs >= ZERO_PROMOTION_MIN_INPUTS:
+            warn(
+                messages,
+                f"dream sweep promoted 0 memories for {ZERO_STREAK_LIMIT} consecutive runs "
+                f"despite {total_inputs} input events: {names}",
+            )
+        else:
+            warn(
+                messages,
+                f"dream sweep promoted 0 memories for {ZERO_STREAK_LIMIT} consecutive runs "
+                f"(quiet stream, {total_inputs} input events over window): {names}",
+                severity="soft",
+            )
+
+
+def check_dream_timer(messages: list[str]) -> None:
+    result = run(["systemctl", "--user", "list-timers", "sacred-brain-dream.timer", "--no-pager", "--no-legend"])
+    if result.returncode != 0 or "sacred-brain-dream.timer" not in result.stdout:
+        warn(messages, "sacred-brain-dream.timer is not listed as active")
+
+
+def should_alert(body: str) -> bool:
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    path = STATE_DIR / "healthcheck-alert.json"
+    now = int(time.time())
+    digest = hashlib.sha256(body.encode("utf-8")).hexdigest()
+    try:
+        previous = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        previous = {}
+    if previous.get("digest") == digest and now - int(previous.get("sent_at", 0)) < ALERT_COOLDOWN_SECONDS:
+        return False
+    path.write_text(json.dumps({"digest": digest, "sent_at": now}) + "\n", encoding="utf-8")
+    return True
+
+
+def send_matrix_alert(body: str) -> None:
+    if os.environ.get("SACRED_BRAIN_HEALTH_MATRIX") != "1":
+        return
+    homeserver = os.environ.get("MATRIX_HOMESERVER", "").rstrip("/")
+    token = os.environ.get("MATRIX_ACCESS_TOKEN", "")
+    room_id = os.environ.get("SACRED_BRAIN_HEALTH_MATRIX_ROOM") or os.environ.get("MATRIX_ROOM_ALLOW", "").split(",")[0]
+    if not homeserver or not token or not room_id:
+        print("Matrix alert requested but MATRIX_HOMESERVER/TOKEN/ROOM is missing", file=sys.stderr)
+        return
+    txn_id = f"sacred-brain-health-{int(time.time())}"
+    url = (
+        f"{homeserver}/_matrix/client/v3/rooms/{quote(room_id, safe='')}/send/"
+        f"m.room.message/{quote(txn_id, safe='')}"
+    )
+    payload = json.dumps({"msgtype": "m.notice", "body": body}).encode("utf-8")
+    request = Request(
+        url,
+        data=payload,
+        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+        method="PUT",
+    )
+    try:
+        with urlopen(request, timeout=10) as response:
+            response.read()
+    except Exception as exc:  # noqa: BLE001 - alerting must not hide the original warning.
+        print(f"Matrix alert failed: {exc}", file=sys.stderr)
+
+
+def emit(messages: list[tuple[str, str]]) -> None:
+    hard = [m for severity, m in messages if severity == "hard"]
+    soft = [m for severity, m in messages if severity == "soft"]
+
+    # Soft notices are informational: print them to the journal but never fail the
+    # unit or page. A quiet, idle stream is expected operation, not an incident.
+    if soft:
+        print("Sacred Brain healthcheck notices (non-failing):\n- " + "\n- ".join(soft), file=sys.stderr)
+
+    if not hard:
+        print("Sacred Brain healthcheck OK")
+        return
+
+    body = "Sacred Brain healthcheck warnings:\n- " + "\n- ".join(hard)
+    print(body, file=sys.stderr)
+    if os.environ.get("SB_HEALTH_REPORT_ONLY") == "1":
+        sys.exit(1)
+    if should_alert(body):
+        send_matrix_alert(body)
+        if os.environ.get("SACRED_BRAIN_HEALTH_WALL") == "1":
+            wall = run(["bash", "-lc", "command -v wall"])
+            if wall.stdout.strip():
+                subprocess.run(["wall", body], text=True, input="", check=False)
+    else:
+        print("Alert suppressed by cooldown", file=sys.stderr)
+    sys.exit(1)
+
+
+def main() -> None:
+    messages: list[tuple[str, str]] = []
+    check_user_service(messages, "hippocampus.service")
+    check_user_service(messages, "memory-governor.service")
+    check_dream_timer(messages)
+    check_recent_consolidation(messages)
+    check_dream_promotions(messages)
+    emit(messages)
+
+
+if __name__ == "__main__":
+    main()
