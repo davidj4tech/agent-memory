@@ -25,8 +25,8 @@ drain_outcomes() {
       break
     fi
   done
-  _url="${GOVERNOR_URL:-${HIPPOCAMPUS_URL:-http://127.0.0.1:54323}}"
-  _key="${GOVERNOR_API_KEY:-${HIPPOCAMPUS_API_KEY:-}}"
+  _url="${AGENT_MEMORY_GOVERNOR_URL:-${GOVERNOR_URL:-${HIPPOCAMPUS_URL:-http://127.0.0.1:54323}}}"
+  _key="${AGENT_MEMORY_API_KEY:-${GOVERNOR_API_KEY:-${HIPPOCAMPUS_API_KEY:-}}}"
 
   _tmp="$(mktemp)"
   _posted=0

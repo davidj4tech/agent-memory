@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # sacred-mcp-stdio — launcher for the Sacred Brain MCP server (stdio transport).
 #
-# Sources ~/.config/hippocampus.env if present so HIPPOCAMPUS_URL / _API_KEY /
+# Sources ~/.config/hippocampus.env if present so AGENT_MEMORY_* or legacy HIPPOCAMPUS_URL / _API_KEY /
 # _USER_ID flow through to the server without per-client duplication.
 #
 # Usage: add to your MCP client as:

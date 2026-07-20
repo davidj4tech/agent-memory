@@ -86,8 +86,11 @@ def load_config() -> GovernorConfig:
     cfg = GovernorConfig(
         bind_host=os.environ.get("MG_BIND_HOST", "127.0.0.1"),
         port=int(os.environ.get("MG_PORT", "54323")),
-        hippocampus_url=os.environ.get("HIPPOCAMPUS_URL", "http://127.0.0.1:54321"),
-        hippocampus_api_key=os.environ.get("HIPPOCAMPUS_API_KEY"),
+        hippocampus_url=(
+            os.environ.get("AGENT_MEMORY_HIPPOCAMPUS_URL")
+            or os.environ.get("HIPPOCAMPUS_URL", "http://127.0.0.1:54321")
+        ),
+        hippocampus_api_key=os.environ.get("AGENT_MEMORY_API_KEY") or os.environ.get("HIPPOCAMPUS_API_KEY"),
         litellm_base_url=os.environ.get("LITELLM_BASE_URL", "http://127.0.0.1:4000"),
         litellm_api_key=os.environ.get("LITELLM_API_KEY"),
         stream_enable=_as_bool(os.environ.get("MG_STREAM_ENABLE"), False),

@@ -8,8 +8,8 @@ Usage:
     sacred-brain-explain <memory_id> --json
 
 Env:
-    GOVERNOR_URL       default http://127.0.0.1:54323
-    GOVERNOR_API_KEY   optional bearer token
+    AGENT_MEMORY_GOVERNOR_URL or GOVERNOR_URL       default http://127.0.0.1:54323
+    AGENT_MEMORY_API_KEY or GOVERNOR_API_KEY   optional bearer token
 """
 
 from __future__ import annotations
@@ -69,9 +69,9 @@ def _pretty(body: dict) -> str:
 def main() -> int:
     p = argparse.ArgumentParser(description="Explain memory promotion scoring")
     p.add_argument("memory_id")
-    p.add_argument("--user-id", default=os.environ.get("GOVERNOR_USER_ID", "sam"))
+    p.add_argument("--user-id", default=os.environ.get("AGENT_MEMORY_USER_ID") or os.environ.get("GOVERNOR_USER_ID", "sam"))
     p.add_argument("--json", action="store_true", help="Emit raw JSON")
-    p.add_argument("--url", default=os.environ.get("GOVERNOR_URL", "http://127.0.0.1:54323"))
+    p.add_argument("--url", default=os.environ.get("AGENT_MEMORY_GOVERNOR_URL") or os.environ.get("GOVERNOR_URL", "http://127.0.0.1:54323"))
     args = p.parse_args()
 
     payload = json.dumps({"memory_id": args.memory_id, "user_id": args.user_id}).encode()
@@ -81,7 +81,7 @@ def main() -> int:
         headers={"Content-Type": "application/json"},
         method="POST",
     )
-    if key := os.environ.get("GOVERNOR_API_KEY"):
+    if key := (os.environ.get("AGENT_MEMORY_API_KEY") or os.environ.get("GOVERNOR_API_KEY")):
         req.add_header("X-API-Key", key)
         req.add_header("Authorization", f"Bearer {key}")
 

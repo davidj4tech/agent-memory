@@ -3,13 +3,14 @@
 #
 # Usage:
 #   sacred-search <query> [user_id] [limit]
+#   agent-memory-search <query> [user_id] [limit]  # neutral alias
 #
 # Defaults: user_id=sam, limit=5. Set user_id=david to search memories
 # extracted from ChatGPT conversation imports.
 #
 # Env (loaded from ~/.config/hippocampus.env or ~/.config/sacred-brain.env):
-#   HIPPOCAMPUS_URL       default http://127.0.0.1:54321
-#   HIPPOCAMPUS_API_KEY   required if Hippocampus auth is enabled
+#   AGENT_MEMORY_HIPPOCAMPUS_URL or HIPPOCAMPUS_URL      default http://127.0.0.1:54321
+#   AGENT_MEMORY_API_KEY or HIPPOCAMPUS_API_KEY          required if auth is enabled
 #
 # Hits Hippocampus directly (port 54321), not the Governor's /recall. This
 # means ChatGPT-archive memories are returned — the Governor's archive
@@ -34,8 +35,8 @@ for f in "$HOME/.config/hippocampus.env" "$HOME/.config/sacred-brain.env"; do
   fi
 done
 
-BASE_URL="${HIPPOCAMPUS_URL:-http://127.0.0.1:54321}"
-API_KEY="${HIPPOCAMPUS_API_KEY:-}"
+BASE_URL="${AGENT_MEMORY_HIPPOCAMPUS_URL:-${HIPPOCAMPUS_URL:-http://127.0.0.1:54321}}"
+API_KEY="${AGENT_MEMORY_API_KEY:-${HIPPOCAMPUS_API_KEY:-}}"
 
 ENCODED_QUERY="$(QUERY="$QUERY" python3 -c 'import os, urllib.parse; print(urllib.parse.quote(os.environ["QUERY"]))')"
 
@@ -49,7 +50,7 @@ import json, sys
 try:
     data = json.load(sys.stdin)
 except Exception as e:
-    print(f"sacred-search: failed to parse response: {e}", file=sys.stderr)
+    print(f"agent-memory-search/sacred-search: failed to parse response: {e}", file=sys.stderr)
     sys.exit(1)
 if "memories" not in data:
     # Could be an error body

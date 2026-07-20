@@ -2,8 +2,9 @@
 """
 Prune low-salience auto memories from Hippocampus.
 
-Uses HIPPOCAMPUS_URL and HIPPOCAMPUS_API_KEY (X-API-Key) if set, or can
-read the SQLite file directly when HIPPOCAMPUS_SQLITE_PATH is provided.
+Uses AGENT_MEMORY_HIPPOCAMPUS_URL / AGENT_MEMORY_API_KEY or legacy
+HIPPOCAMPUS_URL / HIPPOCAMPUS_API_KEY (X-API-Key) if set, or can read the
+SQLite file directly when HIPPOCAMPUS_SQLITE_PATH is provided.
 
 Default policy:
 - Only consider entries tagged metadata.auto=true.
@@ -26,13 +27,13 @@ from typing import Any
 
 import requests
 
-HIPPO_URL = os.getenv("HIPPOCAMPUS_URL", "http://127.0.0.1:54321")
-HIPPO_KEY = os.getenv("HIPPOCAMPUS_API_KEY") or os.getenv("HIPPO_API_KEY")
+HIPPO_URL = os.getenv("AGENT_MEMORY_HIPPOCAMPUS_URL") or os.getenv("HIPPOCAMPUS_URL", "http://127.0.0.1:54321")
+HIPPO_KEY = os.getenv("AGENT_MEMORY_API_KEY") or os.getenv("HIPPOCAMPUS_API_KEY") or os.getenv("HIPPO_API_KEY")
 SQLITE_PATH = os.getenv("HIPPOCAMPUS_SQLITE_PATH", str(DEFAULT_DB))
 MAX_PER_USER = int(os.getenv("AUTO_PRUNE_MAX_PER_USER", "200"))
 MAX_AGE_DAYS = int(os.getenv("AUTO_PRUNE_MAX_AGE_DAYS", "30"))
 RESPECT_RELEVANCE = os.getenv("AUTO_PRUNE_RESPECT_RELEVANCE", "true").lower() in {"1", "true", "yes", "on"}
-GOVERNOR_URL = os.getenv("GOVERNOR_URL", "http://127.0.0.1:54323")
+GOVERNOR_URL = os.getenv("AGENT_MEMORY_GOVERNOR_URL") or os.getenv("GOVERNOR_URL", "http://127.0.0.1:54323")
 GOVERNOR_PROTECT_DAYS = int(os.getenv("MG_RECALL_PROTECT_DAYS", "30"))
 OUTCOME_GRACE_DAYS = int(os.getenv("MG_OUTCOME_GRACE_DAYS", "7"))
 PRUNE_CONFIDENCE_FLOOR = float(os.getenv("MG_PRUNE_CONFIDENCE_FLOOR", "0.15"))
