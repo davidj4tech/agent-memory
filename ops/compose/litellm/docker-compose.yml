@@ -1,6 +1,6 @@
 services:
   litellm:
-    image: litellm-proxy:1.80.8
+    image: litellm-proxy:1.93.0
     # To bump: update pip version in Dockerfile after verifying release notes.
     container_name: litellm-proxy
     restart: unless-stopped
@@ -10,7 +10,7 @@ services:
           "CMD",
           "python",
           "-c",
-          "import urllib.request; urllib.request.urlopen(http://127.0.0.1:4000/v1/models, timeout=3).read(); print(ok)",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4000/v1/models', timeout=3).read(); print('ok')",
         ]
       interval: 30s
       timeout: 5s

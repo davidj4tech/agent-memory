@@ -35,7 +35,7 @@ litellm --config /opt/sacred-brain/ops/litellm/config.yaml --port 4000 --host 12
 ## Systemd (Docker Compose)
 - Compose file: `ops/compose/litellm/docker-compose.yml` (binds 127.0.0.1:4000,
   mounts `ops/litellm/config.yaml` read-only, env from `/etc/litellm/litellm.env`,
-  image `ghcr.io/berriai/litellm-proxy:1.53.7`; bump tag after reviewing releases).
+  local image `litellm-proxy:1.93.0`; bump tag and Dockerfile pip version after reviewing releases).
 - Systemd unit: `ops/systemd/litellm-compose.service`.
 
 Install/enable (as root):

@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED=1 \
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install "litellm[proxy]==1.80.8"
+RUN pip install "litellm[proxy]==1.93.0"
 
 WORKDIR /app
 
