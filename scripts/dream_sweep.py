@@ -141,6 +141,33 @@ async def _run(args: argparse.Namespace) -> int:
     )
 
     memories = await hippo.list_memories(args.user_id, limit=args.limit)
+
+    selftest_ids: set[str] = set()
+    if not args.include_selftest:
+        # Exclude selftest / canary seed memories. They carry maxed salience and
+        # get recalled by health checks, so they dominate the score/recall field
+        # and crowd out real memories (e.g. the red5-selftest node-bootstrap seed).
+        # We drop them from scoring AND collect their ids to also exclude from the
+        # REM reflection inputs (which read recall/promotion stats from the store).
+        def _get(mem, k, d=None):
+            return mem.get(k, d) if isinstance(mem, dict) else getattr(mem, k, d)
+
+        def _is_selftest(mem) -> bool:
+            meta = _get(mem, "metadata", {}) or {}
+            src = str(_get(mem, "source") or meta.get("source") or "")
+            return "selftest" in src.lower()
+
+        kept = []
+        for m in memories:
+            if _is_selftest(m):
+                selftest_ids.add(str(_get(m, "id") or _get(m, "memory_id") or ""))
+            else:
+                kept.append(m)
+        if len(kept) != len(memories):
+            print(f"Excluded {len(memories) - len(kept)} selftest/canary seed memory(ies) "
+                  "from the sweep.", file=sys.stderr)
+        memories = kept
+
     if not memories:
         print(f"No memories found for user_id={args.user_id}", file=sys.stderr)
         return 1
@@ -162,7 +189,16 @@ async def _run(args: argparse.Namespace) -> int:
         print(f"Recorded {recorded} dream_promotions row(s).", file=sys.stderr)
 
     if args.reflect:
-        inputs = gather_rem_inputs(store, cfg.stream_log_path, since_hours=24, top_k=20)
+        # Map memory id -> text so the reflection sees content, not just UUIDs.
+        text_by_id = {}
+        for m in memories:
+            _mid = (m.get("id") or m.get("memory_id")) if isinstance(m, dict) \
+                else (getattr(m, "id", None) or getattr(m, "memory_id", None))
+            _txt = (m.get("text") if isinstance(m, dict) else getattr(m, "text", "")) or ""
+            if _mid:
+                text_by_id[str(_mid)] = _txt
+        inputs = gather_rem_inputs(store, cfg.stream_log_path, since_hours=24, top_k=20,
+                                   exclude_ids=selftest_ids, text_by_id=text_by_id)
         if inputs.is_empty:
             print("REM: no inputs (empty stream + no promotions + no recalls); skipping.",
                   file=sys.stderr)
@@ -225,6 +261,8 @@ def main() -> int:
                    help="Run REM reflection (Haiku) and write a dream entry")
     p.add_argument("--limit", type=int, default=500,
                    help="Max memories to fetch from Hippocampus (default 500)")
+    p.add_argument("--include-selftest", action="store_true",
+                   help="Include *-selftest canary seed memories in the sweep (default: excluded)")
     p.add_argument("--json", action="store_true", help="Emit JSON instead of table")
     p.add_argument("--min-score", type=float, default=0.35)
     p.add_argument("--min-recall-count", type=int, default=2)

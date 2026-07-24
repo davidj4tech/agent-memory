@@ -7,9 +7,11 @@ Wants=network-online.target
 Type=simple
 User=sacred
 Group=sacred
-WorkingDirectory=/opt/sacred-brain
 EnvironmentFile=/etc/sacred-brain/memory-governor.env
-ExecStart=/opt/sacred-brain/.venv/bin/python -m memory_governor.app
+# Shared API keys (LITELLM_API_KEY, HIPPOCAMPUS_API_KEY) rendered from the sops
+# secrets store; optional (-), loaded second so it wins. No key literals above.
+EnvironmentFile=-/etc/sacred-brain/secrets.env
+ExecStart=/usr/local/bin/memory-governor
 Restart=always
 RestartSec=3
 
@@ -19,7 +21,7 @@ ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
 ReadWritePaths=/var/lib/sacred-brain
-ReadOnlyPaths=/opt/sacred-brain /etc/sacred-brain
+ReadOnlyPaths=/opt/pipx /etc/sacred-brain
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
