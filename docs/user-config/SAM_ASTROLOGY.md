@@ -4,22 +4,24 @@ Sam can load a small set of “bias signals” derived from a birth timestamp an
 
 ## Configuration
 
-`config/hippocampus.toml` contains defaults:
+`config/hippocampus.toml` contains defaults. David's deployment overrides them in `~/.config/sacred-brain/hippocampus.toml`:
 
 ```toml
 [sam.birth]
-timestamp = "2025-11-22T16:35:00"
+timestamp = "2026-07-04T23:36:00"
 timezone = "Australia/Melbourne"
 location_name = "Melbourne, Australia"
 latitude = -37.8136
 longitude = 144.9631
 
 [sam.astrology]
-enabled = false
+enabled = true
 engine = "swisseph"       # or "fallback"
 signals_enabled = true
-cache_path = "var/cache/sam_chart.json"
+cache_path = "/home/ryer/.local/state/sacred-brain/cache/sam_chart.json"
 ```
+
+The Governor oracle natal record lives at `~/.local/state/sacred-brain/governor/oracle/natal/sam.json`. A copy and identity notes live in `docs/user-config/sam/`.
 
 Env overrides (most common):
 
@@ -30,7 +32,7 @@ Env overrides (most common):
 
 ## Behavior
 
-- When enabled, a chart is computed once and cached to `cache_path`. If Swiss Ephemeris is unavailable, a fallback computes at least the Sun sign (Sagittarius for the bundled date).
+- When enabled, a chart is computed once and cached to `cache_path`. If Swiss Ephemeris is unavailable, a fallback computes at least the Sun sign (Cancer for the bundled date).
 - Signals map to soft tendencies (e.g., synthesis_bias, zoom_out_preference) and are injected as a short “bias note” into Sam’s system prompt.
 - No astrology content is emitted to users unless they ask.
 - If disabled, nothing changes in Sam responses.
