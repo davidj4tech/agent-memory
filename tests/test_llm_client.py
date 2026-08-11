@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from unittest import mock
 
-from sacred_brain.llm_client import LLMClient, MemoryItem, _strip_think, load_llm_client_from_env
+from agent_memory.llm_client import LLMClient, MemoryItem, _strip_think, load_llm_client_from_env
 
 
 def test_generate_reply_calls_llm():

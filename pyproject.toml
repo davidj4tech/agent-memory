@@ -16,7 +16,7 @@ dependencies = [
   "httpx>=0.25",
   "mem0ai>=1.0.1",
   "agno>=2.3.0",
-  # Lower bound is load-bearing: services/sacred_mcp/stdio.py uses the 2.x API
+  # Lower bound is load-bearing: services/agent_memory_mcp/stdio.py uses the 2.x API
   # (MCPServer), which replaced the FastMCP class that mcp 2.0.0 deleted along
   # with the whole `mcp.server.fastmcp` module. On a 1.x the import fails and
   # the client reports only "-32000: Connection closed", which reads like auth.
@@ -28,11 +28,11 @@ hippocampus = "brain.hippocampus.__main__:main"
 memory-governor = "memory_governor.app:run"
 
 [tool.setuptools.packages.find]
-include = ["brain*", "memory_governor*", "sacred_brain*"]
+include = ["brain*", "memory_governor*", "agent_memory*"]
 namespaces = true
 
 [tool.setuptools.package-data]
-"sacred_brain.prompts" = ["*.txt"]
+"agent_memory.prompts" = ["*.txt"]
 
 [project.optional-dependencies]
 # NB: kerykeion (Swiss Ephemeris / pyswisseph C build) is intentionally NOT a

@@ -9,8 +9,8 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Request, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import APIKeyHeader
 
-from sacred_brain.astrology import BirthInfo, compute_bias_note
-from sacred_brain.sam_pipeline import last_route_info
+from agent_memory.astrology import BirthInfo, compute_bias_note
+from agent_memory.sam_pipeline import last_route_info
 
 from .agno_integration import build_agno_agent
 from .bot_router import BotRouter
@@ -204,7 +204,7 @@ def create_app(settings: HippocampusSettings | None = None) -> FastAPI:
 
     @application.get("/doctor")
     async def doctor() -> dict:
-        from sacred_brain.doctor import check_litellm
+        from agent_memory.doctor import check_litellm
 
         litellm_status = check_litellm()
         return {"litellm": litellm_status}

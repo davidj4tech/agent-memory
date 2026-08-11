@@ -22,8 +22,8 @@ export SACRED_MCP_DEFAULT_WRITE_USER_ID
 
 # Prefer an in-tree checkout if present; fall back to importable install.
 REPO="${SACRED_BRAIN_ROOT:-/opt/sacred-brain}"
-if [[ -d "$REPO/services/sacred_mcp" ]]; then
+if [[ -d "$REPO/services/agent_memory_mcp" ]]; then
   cd "$REPO"
 fi
 
-exec python3 -m services.sacred_mcp.stdio
+exec python3 -m services.agent_memory_mcp.stdio

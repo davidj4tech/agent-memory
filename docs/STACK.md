@@ -2,7 +2,7 @@
 
 - Matrix bot: `bots/matrix/mention_bot.py` (matrix-nio), managed by `matrix-bot.service`. Optional TTS/STT via LiteLLM.
 - Hippocampus: `brain/hippocampus/app.py`, config `config/hippocampus.toml`, serves `/matrix/respond` for Sam.
-- Sam pipeline: `sacred_brain/sam_pipeline.py`, `sacred_brain/llm_client.py`, routing in `sacred_brain/routing.py`.
+- Sam pipeline: `agent_memory/sam_pipeline.py`, `agent_memory/llm_client.py`, routing in `agent_memory/routing.py`.
 - LiteLLM proxy: `ops/litellm/config.yaml`, compose in `ops/compose/litellm` (port 4000). Models include `sam-*`, `gpt-4o-mini-tts`, `whisper-1`.
 - Baibot: `ops/compose/baibot/config.yml` (agents point to LiteLLM at `host.docker.internal:4000`); mainly for Matrix-side persona, not required for the nio bot.
 - Matrix appservice bridges: binary installs under `/opt/mautrix-*` with configs in `/etc/matrix-bridges` and data in `/var/lib/mautrix-*` (see `docs/MATRIX_BRIDGES.md`).

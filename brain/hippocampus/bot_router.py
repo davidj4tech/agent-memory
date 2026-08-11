@@ -5,8 +5,8 @@ import logging
 import re
 from pathlib import Path
 
-from sacred_brain.prompts import SYSTEM_PROMPT
-from sacred_brain.sam_pipeline import sam_generate_reply
+from agent_memory.prompts import SYSTEM_PROMPT
+from agent_memory.sam_pipeline import sam_generate_reply
 
 from .config import HippocampusSettings
 from .mem0_adapter import Mem0Adapter

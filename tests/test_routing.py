@@ -1,4 +1,4 @@
-from sacred_brain.routing import detect_error_loop, determine_route, escalate_route
+from agent_memory.routing import detect_error_loop, determine_route, escalate_route
 
 
 def test_determine_route_defaults_to_fast():

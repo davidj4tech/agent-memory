@@ -7,7 +7,7 @@ import json
 import httpx
 import pytest
 
-from services.sacred_mcp.handlers import (
+from services.agent_memory_mcp.handlers import (
     SacredBrainConfig,
     _parse_scope_path,
     list_scopes,

@@ -19,7 +19,7 @@ from typing import Any
 
 from mcp.server.mcpserver import MCPServer
 
-from services.sacred_mcp.handlers import (
+from services.agent_memory_mcp.handlers import (
     SacredBrainConfig,
     list_scopes as _list_scopes,
     log_memory as _log_memory,
@@ -68,7 +68,7 @@ def _load_config() -> SacredBrainConfig:
 # version is this server's own, not the SDK's — mcp 1.x defaulted it to the mcp
 # package version, so `serverInfo` used to report the SDK release as if the
 # server tracked it. 2.x defaults it to "", so state it explicitly.
-mcp = MCPServer("sacred-brain", version="1.0.0")
+mcp = MCPServer("agent-memory", version="1.0.0")
 _cfg = _load_config()
 
 

@@ -5,8 +5,8 @@ import os
 import time
 from collections.abc import Iterable
 
-from sacred_brain.llm_client import MemoryItem, load_llm_client_from_env
-from sacred_brain.routing import determine_route, escalate_route
+from agent_memory.llm_client import MemoryItem, load_llm_client_from_env
+from agent_memory.routing import determine_route, escalate_route
 
 LOGGER = logging.getLogger(__name__)
 _LAST_ROUTE: dict[str, str] = {}

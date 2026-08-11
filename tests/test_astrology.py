@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from sacred_brain.astrology import BirthInfo, compute_bias_note, get_chart
+from agent_memory.astrology import BirthInfo, compute_bias_note, get_chart
 
 
 def _default_birth() -> BirthInfo:

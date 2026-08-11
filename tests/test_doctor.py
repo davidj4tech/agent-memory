@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from unittest import mock
 
-from sacred_brain.doctor import check_litellm
+from agent_memory.doctor import check_litellm
 
 
 def test_check_litellm_ok():

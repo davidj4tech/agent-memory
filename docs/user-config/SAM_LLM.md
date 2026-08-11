@@ -6,7 +6,7 @@
 - Reflection toggle: `SAM_REFLECTION_ENABLED` (currently integrated in the governor reflection path).
 - Memory packing: max context = `SAM_MEMORY_CONTEXT_MAX` (default 3), candidates = `SAM_MEMORY_CANDIDATES_MAX` (default 8).
 - Fallback: if disabled or call fails, reply is a deterministic message about LLM not attached.
-- System prompt lives in `sacred_brain/prompts/sam_system.txt`; adjust tone/rules there.
+- System prompt lives in `agent_memory/prompts/sam_system.txt`; adjust tone/rules there.
 
 To point at LiteLLM: ensure LiteLLM is running on 127.0.0.1:4000 and set `SAM_LLM_MODEL` to a served model ID.
 

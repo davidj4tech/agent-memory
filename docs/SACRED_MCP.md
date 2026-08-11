@@ -85,7 +85,7 @@ Per-machine defaults for the backing URLs live in [`user-config/machines.md`](us
 ## Smoke test
 
 ```
-python3 -m services.sacred_mcp.stdio < /dev/null  # exits immediately — expected
+python3 -m services.agent_memory_mcp.stdio < /dev/null  # exits immediately — expected
 ```
 
 For an interactive check, spawn the server with the official MCP Inspector (`npx @modelcontextprotocol/inspector ~/.local/bin/sacred-mcp-stdio`) and call `search_memory({"query": "chatgpt", "user_id": "david", "limit": 2})`. The result should match `sacred-search "chatgpt" david 2`.
