@@ -21,8 +21,8 @@ ZERO_PROMOTION_MIN_INPUTS = int(os.environ.get("SB_HEALTH_ZERO_PROMOTION_MIN_INP
 # If the newest dream file is older than this, the sweep itself is likely stalled.
 DREAM_STALE_HOURS = float(os.environ.get("SB_HEALTH_DREAM_STALE_HOURS", "48"))
 JOURNAL_WINDOW = os.environ.get("SB_HEALTH_JOURNAL_WINDOW", "2 hours ago")
-DREAMS_DIR = Path(os.environ.get("DREAMS_OUTPUT_PATH", str(Path.home() / ".local/state/sacred-brain/dreams")))
-STATE_DIR = Path(os.environ.get("MG_STATE_DIR", str(Path.home() / ".local/state/sacred-brain/governor")))
+DREAMS_DIR = Path(os.environ.get("DREAMS_OUTPUT_PATH", str(Path.home() / ".local/state/agent-memory/dreams")))
+STATE_DIR = Path(os.environ.get("MG_STATE_DIR", str(Path.home() / ".local/state/agent-memory/governor")))
 ALERT_COOLDOWN_SECONDS = int(os.environ.get("SB_HEALTH_ALERT_COOLDOWN_SECONDS", str(6 * 60 * 60)))
 
 
@@ -130,9 +130,9 @@ def check_dream_promotions(messages: list[tuple[str, str]]) -> None:
 
 
 def check_dream_timer(messages: list[str]) -> None:
-    result = run(["systemctl", "--user", "list-timers", "sacred-brain-dream.timer", "--no-pager", "--no-legend"])
-    if result.returncode != 0 or "sacred-brain-dream.timer" not in result.stdout:
-        warn(messages, "sacred-brain-dream.timer is not listed as active")
+    result = run(["systemctl", "--user", "list-timers", "agent-memory-dream.timer", "--no-pager", "--no-legend"])
+    if result.returncode != 0 or "agent-memory-dream.timer" not in result.stdout:
+        warn(messages, "agent-memory-dream.timer is not listed as active")
 
 
 def should_alert(body: str) -> bool:
@@ -185,13 +185,13 @@ def emit(messages: list[tuple[str, str]]) -> None:
     # Soft notices are informational: print them to the journal but never fail the
     # unit or page. A quiet, idle stream is expected operation, not an incident.
     if soft:
-        print("Sacred Brain healthcheck notices (non-failing):\n- " + "\n- ".join(soft), file=sys.stderr)
+        print("agent-memory healthcheck notices (non-failing):\n- " + "\n- ".join(soft), file=sys.stderr)
 
     if not hard:
-        print("Sacred Brain healthcheck OK")
+        print("agent-memory healthcheck OK")
         return
 
-    body = "Sacred Brain healthcheck warnings:\n- " + "\n- ".join(hard)
+    body = "agent-memory healthcheck warnings:\n- " + "\n- ".join(hard)
     print(body, file=sys.stderr)
     if os.environ.get("SB_HEALTH_REPORT_ONLY") == "1":
         sys.exit(1)

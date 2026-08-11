@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# sacred-mcp-stdio — launcher for the Sacred Brain MCP server (stdio transport).
+# agent-memory-mcp-stdio — launcher for the Sacred Brain MCP server (stdio transport).
 #
 # Sources ~/.config/hippocampus.env if present so AGENT_MEMORY_* or legacy HIPPOCAMPUS_URL / _API_KEY /
 # _USER_ID flow through to the server without per-client duplication.
 #
 # Usage: add to your MCP client as:
-#   claude mcp add sacred-brain /home/<user>/.local/bin/sacred-mcp-stdio
+#   claude mcp add sacred-brain /home/<user>/.local/bin/agent-memory-mcp-stdio
 # Or in Claude Desktop claude_desktop_config.json:
-#   "sacred-brain": { "command": "/home/<user>/.local/bin/sacred-mcp-stdio" }
+#   "sacred-brain": { "command": "/home/<user>/.local/bin/agent-memory-mcp-stdio" }
 set -euo pipefail
 
-for f in "$HOME/.config/hippocampus.env" "$HOME/.config/sacred-brain.env"; do
+for f in "$HOME/.config/hippocampus.env" "$HOME/.config/agent-memory.env"; do
   if [[ -r "$f" ]]; then set -a; . "$f"; set +a; break; fi
 done
 

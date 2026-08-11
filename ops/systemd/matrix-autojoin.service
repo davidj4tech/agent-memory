@@ -1,5 +1,5 @@
 [Unit]
-Description=Sacred Brain Matrix Auto-Join Helper
+Description=agent-memory Matrix Auto-Join Helper
 After=network.target
 
 [Service]

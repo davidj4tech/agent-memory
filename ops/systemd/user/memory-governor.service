@@ -1,16 +1,16 @@
 [Unit]
-Description=Sacred Brain Memory Governor (policy/recall layer, user service)
+Description=agent-memory Memory Governor (policy/recall layer, user service)
 Documentation=https://github.com/davidj4tech/sacred-brain
 After=network.target hippocampus.service
 Wants=hippocampus.service
 
 [Service]
 Type=simple
-EnvironmentFile=%h/.config/sacred-brain/memory-governor.env
+EnvironmentFile=%h/.config/agent-memory/memory-governor.env
 # Secrets (LITELLM_API_KEY, HIPPOCAMPUS_API_KEY) rendered from the sops store by
 # dotfiles-secrets; loaded second so it wins, optional (-) so the unit still
 # starts if it's absent.
-EnvironmentFile=-%h/.config/sacred-brain/secrets.env
+EnvironmentFile=-%h/.config/agent-memory/secrets.env
 ExecStart=%h/.local/bin/memory-governor
 Restart=on-failure
 RestartSec=3

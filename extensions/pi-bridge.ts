@@ -14,7 +14,7 @@
  *   session_shutdown       → drain ~/.cache/sacred-brain/pi-pending-outcome.jsonl
  *
  * Env (loaded from process.env, then ~/.config/hippocampus.env, then
- * ~/.config/sacred-brain.env, in that order):
+ * ~/.config/agent-memory.env, in that order):
  *   GOVERNOR_URL       (default: http://127.0.0.1:54323; HIPPOCAMPUS_URL accepted as fallback)
  *   GOVERNOR_API_KEY   (HIPPOCAMPUS_API_KEY accepted as fallback)
  *   GOVERNOR_USER_ID   (HIPPOCAMPUS_USER_ID accepted; default: sam)
@@ -55,7 +55,7 @@ function parseEnvFile(p: string): Record<string, string> {
 
 const HOME = homedir();
 const FILE_ENV: Record<string, string> = (() => {
-	for (const f of [join(HOME, ".config/hippocampus.env"), join(HOME, ".config/sacred-brain.env")]) {
+	for (const f of [join(HOME, ".config/hippocampus.env"), join(HOME, ".config/agent-memory.env")]) {
 		if (existsSync(f)) return parseEnvFile(f);
 	}
 	return {};
@@ -142,7 +142,7 @@ function formatMemoryBlock(scopePath: string, results: RecallResult[]): string {
 	lines.push("");
 	lines.push(
 		"> Search long-term memory on demand: `sacred-search <query> [user_id] [limit]` " +
-		"(defaults: `user_id=sam`, `limit=5`). See `docs/SACRED_SEARCH.md` in the sacred-brain repo.",
+		"(defaults: `user_id=sam`, `limit=5`). See `docs/AGENT_MEMORY_SEARCH.md` in the sacred-brain repo.",
 	);
 	lines.push("");
 	if (!results.length) {

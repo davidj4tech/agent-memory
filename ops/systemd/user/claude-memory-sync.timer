@@ -1,5 +1,5 @@
 [Unit]
-Description=Hourly Claude memory -> Sacred Brain sync
+Description=Hourly Claude memory -> agent-memory sync
 
 [Timer]
 OnCalendar=hourly

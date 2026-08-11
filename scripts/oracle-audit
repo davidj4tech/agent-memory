@@ -184,7 +184,7 @@ def _print_human(report: dict) -> None:
             if streak >= 14:
                 print(f"  ⚠ {u} has been natal_partial for {streak} nights — "
                       "consider filling in missing fields "
-                      f"(`scripts/sacred-brain-oracle show {u}` to see gaps).")
+                      f"(`scripts/agent-memory-oracle show {u}` to see gaps).")
     print()
 
     print("natal records:")

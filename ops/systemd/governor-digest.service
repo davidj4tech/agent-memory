@@ -10,7 +10,7 @@ WorkingDirectory=/opt/sacred-brain
 Environment=MG_USER_ID=sam
 Environment=DIGEST_OUTPUT_DIR=/opt/sam/memory/memory
 Environment=MG_TZ_OFFSET_HOURS=11
-ExecStart=/opt/pipx/venvs/sacred-brain-hippocampus/bin/python /opt/sacred-brain/scripts/governor_digest.py
+ExecStart=/opt/pipx/venvs/agent-memory/bin/python /opt/sacred-brain/scripts/governor_digest.py
 
 # Hardening (lighter for oneshot)
 NoNewPrivileges=true

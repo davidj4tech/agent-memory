@@ -4,7 +4,7 @@ Sam can load a small set of “bias signals” derived from a birth timestamp an
 
 ## Configuration
 
-`config/hippocampus.toml` contains defaults. David's deployment overrides them in `~/.config/sacred-brain/hippocampus.toml`:
+`config/hippocampus.toml` contains defaults. David's deployment overrides them in `~/.config/agent-memory/hippocampus.toml`:
 
 ```toml
 [sam.birth]
@@ -18,10 +18,10 @@ longitude = 144.9631
 enabled = true
 engine = "swisseph"       # or "fallback"
 signals_enabled = true
-cache_path = "/home/ryer/.local/state/sacred-brain/cache/sam_chart.json"
+cache_path = "/home/ryer/.local/state/agent-memory/cache/sam_chart.json"
 ```
 
-The Governor oracle natal record lives at `~/.local/state/sacred-brain/governor/oracle/natal/sam.json`. A copy and identity notes live in `docs/user-config/sam/`.
+The Governor oracle natal record lives at `~/.local/state/agent-memory/governor/oracle/natal/sam.json`. A copy and identity notes live in `docs/user-config/sam/`.
 
 Env overrides (most common):
 

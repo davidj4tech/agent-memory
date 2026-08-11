@@ -52,7 +52,7 @@ async def _ensure_natal_or_alert(user_id: str, cfg, hippo) -> None:
 
     Auto-saves only when discovery returns a complete date (year/month/day).
     Partial finds (e.g. time but no date) are also logged so the operator can
-    fill the rest in via `sacred-brain-oracle set`.
+    fill the rest in via `agent-memory-oracle set`.
     """
     existing = load_natal(cfg.state_dir, user_id)
     existing_prec = natal_precision(existing)
@@ -105,7 +105,7 @@ async def _ensure_natal_or_alert(user_id: str, cfg, hippo) -> None:
         missing = ["year", "month", "day", "hour", "minute", "city", "tz_str"]
         msg = (
             f"oracle: no natal date on file for {user_id}; using mundane sky. "
-            f"Run `scripts/sacred-brain-oracle set {user_id} --date YYYY-MM-DD …` "
+            f"Run `scripts/agent-memory-oracle set {user_id} --date YYYY-MM-DD …` "
             "to enable a transit chart."
         )
     else:  # "date" — partial chart drawn; Moon/Asc/houses dropped
@@ -116,7 +116,7 @@ async def _ensure_natal_or_alert(user_id: str, cfg, hippo) -> None:
             f"oracle: partial transit chart drawn for {user_id} (date-only); "
             f"missing {', '.join(missing)}. Moon, Nodes, Ascendant, MC, and "
             f"house-cusp aspects are excluded tonight. "
-            f"Run `scripts/sacred-brain-oracle set {user_id} …` with "
+            f"Run `scripts/agent-memory-oracle set {user_id} …` with "
             "--time / --lat/--lng / --tz to upgrade."
         )
 

@@ -1,9 +1,9 @@
 # Sacred Brain healthcheck
 
-`scripts/sacred-brain-healthcheck` is a oneshot watcher that runs hourly and
+`scripts/agent-memory-healthcheck` is a oneshot watcher that runs hourly and
 reports on the health of the dream sweep and consolidation pipeline. It is
 **user-scoped** on the live deployment: it calls `systemctl --user`, reads
-state under `~/.local/state/sacred-brain`, and is driven by the units in
+state under `~/.local/state/agent-memory`, and is driven by the units in
 [`ops/systemd/user/`](../ops/systemd/user/).
 
 ## What it checks
@@ -11,7 +11,7 @@ state under `~/.local/state/sacred-brain`, and is driven by the units in
 | Check | Severity |
 | --- | --- |
 | `hippocampus.service` / `memory-governor.service` not active | hard |
-| `sacred-brain-dream.timer` not listed/active | hard |
+| `agent-memory-dream.timer` not listed/active | hard |
 | No successful `/consolidate` in the recent journal window | hard |
 | Recent `/consolidate` 4xx/5xx failures | hard |
 | Newest dream file older than `SB_HEALTH_DREAM_STALE_HOURS` (sweep stalled) | hard |
@@ -45,8 +45,8 @@ quiet instead of failing the unit every hour.
 | `SB_HEALTH_JOURNAL_WINDOW` | `2 hours ago` | `--since` window for the `/consolidate` journal check |
 | `SB_HEALTH_ALERT_COOLDOWN_SECONDS` | `21600` | Suppress duplicate Matrix/wall alerts within this window |
 | `SB_HEALTH_REPORT_ONLY` | unset | If `1`, exit non-zero on hard warnings but skip alerting (dry run) |
-| `DREAMS_OUTPUT_PATH` | `~/.local/state/sacred-brain/dreams` | Dream markdown directory |
-| `MG_STATE_DIR` | `~/.local/state/sacred-brain/governor` | Alert cooldown state |
+| `DREAMS_OUTPUT_PATH` | `~/.local/state/agent-memory/dreams` | Dream markdown directory |
+| `MG_STATE_DIR` | `~/.local/state/agent-memory/governor` | Alert cooldown state |
 | `SACRED_BRAIN_HEALTH_MATRIX` | unset | If `1`, send hard warnings to Matrix |
 | `SACRED_BRAIN_HEALTH_WALL` | unset | If `1`, `wall` hard warnings to logged-in users |
 
@@ -58,18 +58,18 @@ The system `Makefile` installs everything to `/etc/systemd/system` under the
 
 ```bash
 # script on PATH
-install -m 0755 scripts/sacred-brain-healthcheck ~/.local/bin/sacred-brain-healthcheck
+install -m 0755 scripts/agent-memory-healthcheck ~/.local/bin/agent-memory-healthcheck
 
 # user units
-install -m 0644 ops/systemd/user/sacred-brain-healthcheck.service ~/.config/systemd/user/
-install -m 0644 ops/systemd/user/sacred-brain-healthcheck.timer   ~/.config/systemd/user/
+install -m 0644 ops/systemd/user/agent-memory-healthcheck.service ~/.config/systemd/user/
+install -m 0644 ops/systemd/user/agent-memory-healthcheck.timer   ~/.config/systemd/user/
 systemctl --user daemon-reload
-systemctl --user enable --now sacred-brain-healthcheck.timer
+systemctl --user enable --now agent-memory-healthcheck.timer
 ```
 
 Run it by hand (dry, no alerts):
 
 ```bash
 SB_HEALTH_REPORT_ONLY=1 SACRED_BRAIN_HEALTH_MATRIX=0 SACRED_BRAIN_HEALTH_WALL=0 \
-  ~/.local/bin/sacred-brain-healthcheck
+  ~/.local/bin/agent-memory-healthcheck
 ```

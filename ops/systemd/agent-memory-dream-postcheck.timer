@@ -1,5 +1,5 @@
 [Unit]
-Description=Fire the sacred-brain-dream post-check once, ~2 days after first nightly run
+Description=Fire the agent-memory-dream post-check once, ~2 days after first nightly run
 
 [Timer]
 # One-shot: specific UTC date+time. OnCalendar with a specific date fires once.

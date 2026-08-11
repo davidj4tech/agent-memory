@@ -1,5 +1,5 @@
 [Unit]
-Description=Sacred Brain nightly dreaming sweep (score + promote + REM reflection)
+Description=agent-memory nightly dreaming sweep (score + promote + REM reflection)
 After=memory-governor.service hippocampus.service
 Requires=memory-governor.service
 

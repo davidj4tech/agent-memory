@@ -1,9 +1,10 @@
 [Unit]
-Description=Nightly Sacred Brain dreaming sweep (03:00)
+Description=Run agent-memory dreaming sweep nightly
 
 [Timer]
 OnCalendar=*-*-* 03:00:00
 Persistent=true
+RandomizedDelaySec=300
 
 [Install]
 WantedBy=timers.target

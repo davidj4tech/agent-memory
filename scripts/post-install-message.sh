@@ -11,7 +11,7 @@ echo "  Sacred Brain installed."
 echo ""
 echo "    Config: $ETC_DIR/"
 echo "    State:  /var/lib/sacred-brain/"
-echo "    Code:   /opt/pipx/venvs/sacred-brain-hippocampus/"
+echo "    Code:   /opt/pipx/venvs/agent-memory/"
 echo ""
 
 if [[ -d "$ETC_DIR" ]] && grep -rlE 'CHANGE[_-]ME' "$ETC_DIR" >/dev/null 2>&1; then

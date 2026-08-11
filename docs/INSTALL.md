@@ -40,7 +40,7 @@ just timers
 
 The repo lives at `/opt/sacred-brain/` because the timer-target scripts
 (in `scripts/`) run from there. The Python services themselves run from a
-pipx-managed venv at `/opt/pipx/venvs/sacred-brain-hippocampus/`, with
+pipx-managed venv at `/opt/pipx/venvs/agent-memory/`, with
 `hippocampus` and `memory-governor` symlinked into `/usr/local/bin/`.
 
 ## What `make install` Does
@@ -49,7 +49,7 @@ pipx-managed venv at `/opt/pipx/venvs/sacred-brain-hippocampus/`, with
 |--------|--------|
 | `install-deps` | Creates `sacred` system user (nologin) and `/var/lib/sacred-brain/{hippocampus,governor,cache}` and `/etc/sacred-brain/` |
 | `migrate-legacy` | Removes any old `/opt/sacred-brain/.venv/` from a pre-pipx install (idempotent) |
-| `install-package` | `pipx install --force .` into `/opt/pipx/venvs/sacred-brain-hippocampus/`, with `hippocampus` and `memory-governor` symlinks in `$(PREFIX)/bin/` |
+| `install-package` | `pipx install --force .` into `/opt/pipx/venvs/agent-memory/`, with `hippocampus` and `memory-governor` symlinks in `$(PREFIX)/bin/` |
 | `install-bin` | Installs `sacred-search` to `$(PREFIX)/bin/sacred-search` |
 | `install-systemd` | Copies all unit files from `ops/systemd/` to `/etc/systemd/system/`, runs `daemon-reload`, enables every unit with an `[Install]` section |
 | `install-config` | Copies `.example` templates to `/etc/sacred-brain/` (skips files that already exist) |
@@ -102,7 +102,7 @@ The Makefile honors standard variables for non-default installs and packagers:
 
 ```
 /opt/sacred-brain/                        ← repo clone (timer scripts run from here)
-/opt/pipx/venvs/sacred-brain-hippocampus/ ← installed Python package (services run from here)
+/opt/pipx/venvs/agent-memory/ ← installed Python package (services run from here)
 /usr/local/bin/hippocampus
 /usr/local/bin/memory-governor
 /usr/local/bin/sacred-search

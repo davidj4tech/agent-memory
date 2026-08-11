@@ -8,7 +8,7 @@
 # Defaults: user_id=sam, limit=5. Set user_id=david to search memories
 # extracted from ChatGPT conversation imports.
 #
-# Env (loaded from ~/.config/hippocampus.env or ~/.config/sacred-brain.env):
+# Env (loaded from ~/.config/hippocampus.env or ~/.config/agent-memory.env):
 #   AGENT_MEMORY_HIPPOCAMPUS_URL or HIPPOCAMPUS_URL      default http://127.0.0.1:54321
 #   AGENT_MEMORY_API_KEY or HIPPOCAMPUS_API_KEY          required if auth is enabled
 #
@@ -28,7 +28,7 @@ USER_ID="${2:-sam}"
 LIMIT="${3:-5}"
 
 # Load env (first hit wins)
-for f in "$HOME/.config/hippocampus.env" "$HOME/.config/sacred-brain.env"; do
+for f in "$HOME/.config/hippocampus.env" "$HOME/.config/agent-memory.env"; do
   if [[ -r "$f" ]]; then
     set -a; . "$f"; set +a
     break

@@ -137,7 +137,7 @@ uninstall:
 	@rm -f $(BIN_DIR)/sacred-search
 	@echo "  [+] Uninstalling Python package"
 	@PIPX_HOME=$(PIPX_HOME) PIPX_BIN_DIR=$(PIPX_BIN_DIR) \
-	    pipx uninstall sacred-brain-hippocampus 2>/dev/null || true
+	    pipx uninstall agent-memory 2>/dev/null || true
 	@echo "  [+] Kept $(ETC_DIR) and $(STATE_DIR) (use 'make uninstall-purge' to remove)"
 
 uninstall-purge: uninstall

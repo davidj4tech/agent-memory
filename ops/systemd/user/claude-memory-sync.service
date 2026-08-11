@@ -1,5 +1,5 @@
 [Unit]
-Description=Sync Claude Code memory files into Sacred Brain governor (user)
+Description=Sync Claude Code memory files into agent-memory governor (user)
 After=memory-governor.service
 Wants=memory-governor.service
 
@@ -8,4 +8,4 @@ Type=oneshot
 EnvironmentFile=%h/.config/hippocampus.env
 WorkingDirectory=%h/projects/agent-memory
 Environment=PYTHONPATH=%h/projects/agent-memory
-ExecStart=%h/.local/share/pipx/venvs/sacred-brain-hippocampus/bin/python %h/projects/agent-memory/scripts/sync_claude_memory.py
+ExecStart=%h/.local/share/pipx/venvs/agent-memory/bin/python %h/projects/agent-memory/scripts/sync_claude_memory.py

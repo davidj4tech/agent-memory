@@ -1,5 +1,5 @@
 [project]
-name = "sacred-brain-hippocampus"
+name = "agent-memory"
 version = "0.1.0"
 description = "FastAPI microservice that exposes a Mem0-backed memory API"
 readme = "README.md"
@@ -38,7 +38,7 @@ namespaces = true
 # NB: kerykeion (Swiss Ephemeris / pyswisseph C build) is intentionally NOT a
 # dependency here. Astrology/natal computation belongs to the *astrotunes*
 # project, which owns kerykeion; sacred-brain's astrology code (memory_governor
-# oracle, scripts/natal_to_sacred_brain) should delegate there. The hippocampus
+# oracle, scripts/natal_to_agent_memory) should delegate there. The hippocampus
 # core needs none of it (the sqlite backend is lexical — no embeddings/LLM).
 dev = [
   "pytest>=7.4",

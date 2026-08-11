@@ -77,7 +77,7 @@ ssh user@host chmod 600 ~/.config/hippocampus.env
 
 ### 3.1 `sacred-search` (all apps with shell access)
 
-The on-demand memory-search CLI. See `docs/SACRED_SEARCH.md` for the full reference.
+The on-demand memory-search CLI. See `docs/AGENT_MEMORY_SEARCH.md` for the full reference.
 
 ```
 # Either symlink from the live tree (homer):
@@ -129,7 +129,7 @@ Defaults: `user_id=sam`, `limit=5`. Use `user_id=david` to search memories extra
 
 This hits Sacred Brain's Hippocampus store directly. Use it when a query is likely to reference something David has discussed before (past decisions, project context, ChatGPT conversations) rather than guessing from context alone.
 
-See `/opt/sacred-brain/docs/SACRED_SEARCH.md` for details.
+See `/opt/sacred-brain/docs/AGENT_MEMORY_SEARCH.md` for details.
 ```
 
 For Claude Code, this auto-loads. For Codex and OpenCode, loading at user-scope is by convention — verify once per version by asking a fresh session "what is sacred-search?" outside any project.
@@ -215,5 +215,5 @@ Sacred Brain does not (yet) have per-app API keys. If you need per-app revocatio
 - `docs/STACK.md` — port map and running services
 - `docs/API.md` — Hippocampus REST API reference
 - `docs/MEMORY_GOVERNOR_v2.md` — scopes, tiers, and the Governor's policy layer
-- `docs/SACRED_SEARCH.md` — on-demand search tool
+- `docs/AGENT_MEMORY_SEARCH.md` — on-demand search tool
 - `docs/CLAUDE_CODE_BRIDGE.md` / `docs/OPENCODE_BRIDGE.md` / `docs/CODEX_BRIDGE.md` — per-coding-agent bridges

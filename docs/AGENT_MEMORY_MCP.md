@@ -30,10 +30,10 @@ Exposes Sacred Brain as a Model Context Protocol server so any MCP-speaking agen
 
 ## Install (stdio, homer)
 
-The launcher `scripts/sacred-mcp-stdio` sources `~/.config/hippocampus.env`, activates the repo checkout, and execs the server. Symlink it into `~/.local/bin/`:
+The launcher `scripts/agent-memory-mcp-stdio` sources `~/.config/hippocampus.env`, activates the repo checkout, and execs the server. Symlink it into `~/.local/bin/`:
 
 ```
-ln -sf /opt/sacred-brain/scripts/sacred-mcp-stdio ~/.local/bin/sacred-mcp-stdio
+ln -sf /opt/sacred-brain/scripts/agent-memory-mcp-stdio ~/.local/bin/agent-memory-mcp-stdio
 ```
 
 Requires `mcp>=1.27.0` importable from the system Python (already in `pyproject.toml`).
@@ -43,7 +43,7 @@ Requires `mcp>=1.27.0` importable from the system Python (already in `pyproject.
 ### Claude Code
 
 ```
-claude mcp add -s user sacred-brain ~/.local/bin/sacred-mcp-stdio \
+claude mcp add -s user sacred-brain ~/.local/bin/agent-memory-mcp-stdio \
   -e SACRED_MCP_DEFAULT_USER_ID=sam
 ```
 
@@ -57,7 +57,7 @@ Verify with `claude mcp list` — should show `sacred-brain: ✓ Connected`. Res
 {
   "mcpServers": {
     "sacred-brain": {
-      "command": "/home/ryer/.local/bin/sacred-mcp-stdio",
+      "command": "/home/ryer/.local/bin/agent-memory-mcp-stdio",
       "env": { "SACRED_MCP_DEFAULT_USER_ID": "sam" }
     }
   }
@@ -88,11 +88,11 @@ Per-machine defaults for the backing URLs live in [`user-config/machines.md`](us
 python3 -m services.agent_memory_mcp.stdio < /dev/null  # exits immediately — expected
 ```
 
-For an interactive check, spawn the server with the official MCP Inspector (`npx @modelcontextprotocol/inspector ~/.local/bin/sacred-mcp-stdio`) and call `search_memory({"query": "chatgpt", "user_id": "david", "limit": 2})`. The result should match `sacred-search "chatgpt" david 2`.
+For an interactive check, spawn the server with the official MCP Inspector (`npx @modelcontextprotocol/inspector ~/.local/bin/agent-memory-mcp-stdio`) and call `search_memory({"query": "chatgpt", "user_id": "david", "limit": 2})`. The result should match `sacred-search "chatgpt" david 2`.
 
 ## Related
 
-- `docs/SACRED_SEARCH.md` — the CLI this complements
+- `docs/AGENT_MEMORY_SEARCH.md` — the CLI this complements
 - `docs/API.md` — the underlying Hippocampus REST
 - `docs/MEMORY_GOVERNOR_v2.md` §3 — scope hierarchy (`recall_scope` semantics)
 - `agents/tasks/007_mcp_server.md` — the plan

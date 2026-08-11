@@ -18,7 +18,7 @@ drain_outcomes() {
   mkdir -p "$_dir"
 
   # Source env (same rule as the other scripts)
-  for _f in "$HOME/.config/hippocampus.env" "$HOME/.config/sacred-brain.env"; do
+  for _f in "$HOME/.config/hippocampus.env" "$HOME/.config/agent-memory.env"; do
     if [ -r "$_f" ]; then
       # shellcheck disable=SC1090
       . "$_f"

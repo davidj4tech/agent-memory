@@ -9,7 +9,7 @@ set is bulk-replaceable on schema changes.
 Examples:
 
     # David
-    natal_to_sacred_brain.py --user-id david --name David \\
+    natal_to_agent_memory.py --user-id david --name David \\
         --dob 1976-04-22 --time 12:19 --place Melbourne --country AU --dry-run
 
     # ...then --post when the dry-run looks right.

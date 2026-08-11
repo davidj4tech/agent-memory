@@ -4,8 +4,8 @@
 Thin CLI wrapper around POST /promote-explain.
 
 Usage:
-    sacred-brain-explain <memory_id> [--user-id sam]
-    sacred-brain-explain <memory_id> --json
+    agent-memory-explain <memory_id> [--user-id sam]
+    agent-memory-explain <memory_id> --json
 
 Env:
     AGENT_MEMORY_GOVERNOR_URL or GOVERNOR_URL       default http://127.0.0.1:54323

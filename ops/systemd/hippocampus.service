@@ -1,5 +1,5 @@
 [Unit]
-Description=Sacred Brain Hippocampus Service
+Description=agent-memory Hippocampus Service
 After=network.target
 
 [Service]

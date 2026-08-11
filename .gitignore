@@ -31,7 +31,7 @@ codex-resume.txt
 .env.*
 
 # One-off files
-1.1.sacred-brain-hippocampus.md
+1.1.agent-memory.md
 SESSION_RESUME.md
 tune_llama.sh
 ext/

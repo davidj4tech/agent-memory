@@ -1,6 +1,6 @@
 [Unit]
-Description=One-shot post-check of the first nightly sacred-brain-dream run(s)
-After=sacred-brain-dream.timer
+Description=One-shot post-check of the first nightly agent-memory-dream run(s)
+After=agent-memory-dream.timer
 
 [Service]
 Type=oneshot
@@ -11,17 +11,17 @@ ExecStart=/bin/bash -lc '\
   OUT="/opt/sacred-brain/var/dreams/postcheck-$(date -u +%%Y-%%m-%%dT%%H%%M%%SZ).txt"; \
   mkdir -p /opt/sacred-brain/var/dreams; \
   { \
-    echo "# sacred-brain-dream post-check"; \
+    echo "# agent-memory-dream post-check"; \
     echo "generated: $(date -u +%%FT%%TZ)"; \
     echo; \
     echo "## timer status"; \
-    systemctl status sacred-brain-dream.timer --no-pager -l || true; \
+    systemctl status agent-memory-dream.timer --no-pager -l || true; \
     echo; \
     echo "## service status"; \
-    systemctl status sacred-brain-dream.service --no-pager -l || true; \
+    systemctl status agent-memory-dream.service --no-pager -l || true; \
     echo; \
-    echo "## journalctl -u sacred-brain-dream --since \"3 days ago\""; \
-    journalctl -u sacred-brain-dream.service --since "3 days ago" --no-pager || true; \
+    echo "## journalctl -u agent-memory-dream --since \"3 days ago\""; \
+    journalctl -u agent-memory-dream.service --since "3 days ago" --no-pager || true; \
     echo; \
     echo "## ls /opt/sacred-brain/var/dreams/"; \
     ls -la /opt/sacred-brain/var/dreams/ || true; \

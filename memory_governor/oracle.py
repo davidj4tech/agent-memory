@@ -12,7 +12,7 @@ into its nightly narrative. Two ingredients:
    (Rider-Waite keywords) is bundled in this module.
 
 Natal data lives at `<state_dir>/oracle/natal/<user_id>.json`. Use
-`scripts/sacred-brain-oracle` to manage it.
+`scripts/agent-memory-oracle` to manage it.
 
 All HTTP and filesystem IO is contained here; tests can drive the
 formatters with hand-built dicts.

@@ -1,5 +1,5 @@
 [Unit]
-Description=Run Sacred Brain healthcheck hourly
+Description=Run agent-memory healthcheck hourly
 
 [Timer]
 OnCalendar=hourly

@@ -53,8 +53,8 @@ curl -s -X POST http://127.0.0.1:54323/promote-explain \
 Or use the CLI:
 
 ```bash
-scripts/sacred-brain-explain <memory_id> --user-id sam
-scripts/sacred-brain-explain <memory_id> --json
+scripts/agent-memory-explain <memory_id> --user-id sam
+scripts/agent-memory-explain <memory_id> --json
 ```
 
 Sample pretty output:
@@ -207,7 +207,7 @@ The dreaming sweep upgrades the precision tier whenever it can: a `none →
 date` or `date → datetime` jump from a memory probe is auto-saved and
 logged as `oracle.natal_recovered`. Anything below `datetime` also emits
 a stream-log event naming the missing fields and the exact
-`sacred-brain-oracle set` command to upgrade:
+`agent-memory-oracle set` command to upgrade:
 
 - `oracle.natal_missing` — no date on file; mundane fallback used.
 - `oracle.natal_partial` — partial transit chart was drawn; lists the
@@ -228,19 +228,19 @@ missing and what command will fill them. A successful auto-recovery emits
 You can run the same probe manually:
 
 ```bash
-scripts/sacred-brain-oracle discover sam            # report only
-scripts/sacred-brain-oracle discover sam --save     # save if complete
+scripts/agent-memory-oracle discover sam            # report only
+scripts/agent-memory-oracle discover sam --save     # save if complete
 ```
 
-Manage natal details with `scripts/sacred-brain-oracle`:
+Manage natal details with `scripts/agent-memory-oracle`:
 
 ```bash
-scripts/sacred-brain-oracle show sam
-scripts/sacred-brain-oracle set sam --date 1990-06-15 --time 14:32 \
+scripts/agent-memory-oracle show sam
+scripts/agent-memory-oracle set sam --date 1990-06-15 --time 14:32 \
     --city Portland --nation US --lat 45.52 --lng -122.68 \
     --tz America/Los_Angeles
-scripts/sacred-brain-oracle preview sam     # dry-run snapshot
-scripts/sacred-brain-oracle rm sam
+scripts/agent-memory-oracle preview sam     # dry-run snapshot
+scripts/agent-memory-oracle rm sam
 ```
 
 Storage: `<state_dir>/oracle/natal/<user_id>.json`. Disable globally with
@@ -263,7 +263,7 @@ the hourly path in once scoring is proven on real data.
   `memory_governor/rem.py` (REM reflection: gather / build / call / format),
   `memory_governor/store.py` (`recall_stats` aggregates, `dream_promotions`,
   `top_recalled`)
-- Systemd: `ops/systemd/sacred-brain-dream.{service,timer}`
+- Systemd: `ops/systemd/agent-memory-dream.{service,timer}`
   (OnCalendar `03:00`, runs `dream_sweep.py --apply --reflect` per user
   listed in `MG_DREAM_USERS`, default `sam`)
 - Healthcheck: [`docs/HEALTHCHECK.md`](HEALTHCHECK.md) — hourly watcher over

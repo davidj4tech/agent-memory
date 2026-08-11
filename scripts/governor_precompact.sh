@@ -14,7 +14,7 @@ mkdir -p "$LOG_DIR"
 
 log() { printf '%s precompact: %s\n' "$(date -Iseconds)" "$*" >> "$LOG"; }
 
-for f in "$HOME/.config/hippocampus.env" "$HOME/.config/sacred-brain.env"; do
+for f in "$HOME/.config/hippocampus.env" "$HOME/.config/agent-memory.env"; do
   if [[ -r "$f" ]]; then
     set -a; . "$f"; set +a
     break

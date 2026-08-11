@@ -27,7 +27,7 @@ agent-memory-search "xmpp bot" david     # ChatGPT-extracted memories (user:davi
 
 ## Environment
 
-Loaded from `~/.config/hippocampus.env` or `~/.config/sacred-brain.env`:
+Loaded from `~/.config/hippocampus.env` or `~/.config/agent-memory.env`:
 
 | Var | Legacy alias | Default | Notes |
 |-----|--------------|---------|-------|

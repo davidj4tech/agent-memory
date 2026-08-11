@@ -1,12 +1,12 @@
 [Unit]
-Description=Sacred Brain healthcheck (dream/consolidation watcher)
+Description=agent-memory healthcheck (dream/consolidation watcher)
 After=hippocampus.service memory-governor.service
 Wants=hippocampus.service memory-governor.service
 
 [Service]
 Type=oneshot
-EnvironmentFile=-%h/.config/sacred-brain/memory-governor.env
+EnvironmentFile=-%h/.config/agent-memory/memory-governor.env
 EnvironmentFile=-%h/.config/agent-media/secrets.env
 Environment=SACRED_BRAIN_HEALTH_MATRIX=1
 Environment=SACRED_BRAIN_HEALTH_WALL=1
-ExecStart=%h/.local/bin/sacred-brain-healthcheck
+ExecStart=%h/.local/bin/agent-memory-healthcheck
