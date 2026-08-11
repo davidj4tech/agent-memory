@@ -16,7 +16,12 @@ dependencies = [
   "httpx>=0.25",
   "mem0ai>=1.0.1",
   "agno>=2.3.0",
-  "mcp>=1.27.0",
+  # Upper bound is load-bearing: mcp 2.0.0 deleted `mcp.server.fastmcp`
+  # (FastMCP -> MCPServer in mcp.server.mcpserver), which broke
+  # services/sacred_mcp/stdio.py at import — the client only reports
+  # "-32000: Connection closed", so it reads like auth. Drop the <2 cap only
+  # together with porting that module to the 2.x MCPServer API.
+  "mcp>=1.27.0,<2",
 ]
 
 [project.scripts]
