@@ -17,7 +17,7 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 from services.sacred_mcp.handlers import (
     SacredBrainConfig,
@@ -65,7 +65,10 @@ def _load_config() -> SacredBrainConfig:
     )
 
 
-mcp = FastMCP("sacred-brain")
+# version is this server's own, not the SDK's — mcp 1.x defaulted it to the mcp
+# package version, so `serverInfo` used to report the SDK release as if the
+# server tracked it. 2.x defaults it to "", so state it explicitly.
+mcp = MCPServer("sacred-brain", version="1.0.0")
 _cfg = _load_config()
 
 
