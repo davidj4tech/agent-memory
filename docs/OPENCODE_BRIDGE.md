@@ -40,7 +40,7 @@ See `ops/opencode/example-config.json` for the config stanza. OpenCode's hook ke
 
 Put in `~/.config/hippocampus.env` (the scripts source this if present). The authoritative per-machine values live in [`user-config/machines.md`](user-config/machines.md) — use the Governor URL (`:54323`) column for the bridge.
 
-p8ar (phone) is skipped until OpenCode's Termux story is clearer.
+p8a (phone) is skipped until OpenCode's Termux story is clearer.
 
 ## Outcomes
 

@@ -7,7 +7,7 @@ Sacred Brain distinguishes the human operator from the bot personas. All memorie
 | `user_id` | Kind | Represents | Primary use |
 |-----------|------|------------|-------------|
 | `david` | human | David-the-human | ChatGPT-extracted memories, cross-persona facts, anything a human would later want to reclaim as their own |
-| `sam` | persona | Sam bot persona | Default for homer / sp4r / p8ar coding agents; Clawdbot / OpenClaw workspace bots |
+| `sam` | persona | Sam bot persona | Default for homer / sp4r / p8a coding agents; Clawdbot / OpenClaw workspace bots |
 | `mel` | persona | Mel bot persona | Default for melr |
 
 ## Rule of thumb

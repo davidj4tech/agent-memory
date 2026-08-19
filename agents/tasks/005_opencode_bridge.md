@@ -88,7 +88,7 @@ Must NOT:
 4. Generalise the low-salience source list in `mem_policy.py`; update the task-003 test.
 5. Write `ops/opencode/install.sh` + an example config snippet.
 6. Write `docs/OPENCODE_BRIDGE.md`: what the bridge does, the two install paths (native hook vs wrapper), how outcomes work, how to disable.
-7. Install on homer (primary Pi), sp4r (laptop), and melr; leave p8ar (phone) until OpenCode's Termux story is clearer. Per-machine env config (`GOVERNOR_URL`, `GOVERNOR_USER_ID`) follows the same table as task 003 — melr uses `user_id=mel`, the others use `sam`.
+7. Install on homer (primary Pi), sp4r (laptop), and melr; leave p8a (phone) until OpenCode's Termux story is clearer. Per-machine env config (`GOVERNOR_URL`, `GOVERNOR_USER_ID`) follows the same table as task 003 — melr uses `user_id=mel`, the others use `sam`.
 8. End-to-end test (see Validation).
 
 ## Validation

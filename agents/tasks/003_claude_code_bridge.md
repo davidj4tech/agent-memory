@@ -59,7 +59,7 @@ Do not ship `settings.json` in the repo. Instead:
     - `PreCompact` → runs `governor_precompact.sh`
   - Preserves any existing hook entries (pattern: read with `jq`, splice, write back; never overwrite wholesale).
   - Emits the exact snippet to `ops/claude/example-settings.json` for manual install as a fallback.
-- Document the same for homer, sp4r, melr, p8ar in `docs/CLAUDE_CODE_BRIDGE.md` — each machine runs the installer once.
+- Document the same for homer, sp4r, melr, p8a in `docs/CLAUDE_CODE_BRIDGE.md` — each machine runs the installer once.
 
 Cross-device env config (per machine, in `~/.config/hippocampus.env` or shell profile):
 
@@ -68,9 +68,9 @@ Cross-device env config (per machine, in `~/.config/hippocampus.env` or shell pr
 | homer   | `http://127.0.0.1:54323`    | `sam`              |
 | sp4r    | `http://100.125.48.108:54323` (homer via Tailscale) | `sam` |
 | melr    | `http://100.125.48.108:54323` (homer via Tailscale) | `mel` |
-| p8ar    | `http://100.125.48.108:54323` (homer via Tailscale) | `sam` |
+| p8a    | `http://100.125.48.108:54323` (homer via Tailscale) | `sam` |
 
-The `GOVERNOR_USER_ID` split between homer/sp4r/p8ar (`sam`) and melr (`mel`) is the main reason scopes must be hierarchical (task 002). `sam` and `mel` are bot personas (both ultimately driven by david, the sole human operator) that share `project:*` ancestors but own distinct `user:*` leaves.
+The `GOVERNOR_USER_ID` split between homer/sp4r/p8a (`sam`) and melr (`mel`) is the main reason scopes must be hierarchical (task 002). `sam` and `mel` are bot personas (both ultimately driven by david, the sole human operator) that share `project:*` ancestors but own distinct `user:*` leaves.
 
 ### Governor-side (small)
 
@@ -88,7 +88,7 @@ Must NOT:
 2. Write `scripts/sync_claude_memory.py`; dry-run against `~/.claude/projects/`; inspect planned POSTs before doing a real sync.
 3. Land the `classify_observation` low-salience source list change in `mem_policy.py` with a unit test.
 4. Write `scripts/governor_precompact.sh`. Test by manually invoking with a sample transcript path.
-5. Write `ops/claude/install_hooks.sh` + `ops/claude/example-settings.json`. Install in this order: homer first (verify end-to-end), then sp4r, then melr, then p8ar. Each machine gets its own `GOVERNOR_URL` / `GOVERNOR_USER_ID` per the table above.
+5. Write `ops/claude/install_hooks.sh` + `ops/claude/example-settings.json`. Install in this order: homer first (verify end-to-end), then sp4r, then melr, then p8a. Each machine gets its own `GOVERNOR_URL` / `GOVERNOR_USER_ID` per the table above.
 6. Write `docs/CLAUDE_CODE_BRIDGE.md` — one page: what each hook does, how to install, how to disable, where logs go.
 7. Full round-trip test (see Validation).
 
@@ -116,4 +116,4 @@ Must NOT:
 - `memory_governor/mem_policy.py:classify_observation` (low-salience source list)
 - `~/.claude/projects/<slug>/memory/` (Claude Code auto-memory layout — read-only here)
 - `~/.config/hippocampus.env` (existing env convention to follow)
-- MEMORY.md TTS-hook entries — install pattern across homer / sp4r / p8ar is analogous
+- MEMORY.md TTS-hook entries — install pattern across homer / sp4r / p8a is analogous
