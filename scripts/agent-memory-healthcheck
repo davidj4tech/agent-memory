@@ -5,9 +5,11 @@ import hashlib
 import json
 import os
 import re
+import sqlite3
 import subprocess
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import quote
 from urllib.request import Request, urlopen
@@ -21,6 +23,17 @@ ZERO_PROMOTION_MIN_INPUTS = int(os.environ.get("SB_HEALTH_ZERO_PROMOTION_MIN_INP
 # If the newest dream file is older than this, the sweep itself is likely stalled.
 DREAM_STALE_HOURS = float(os.environ.get("SB_HEALTH_DREAM_STALE_HOURS", "48"))
 JOURNAL_WINDOW = os.environ.get("SB_HEALTH_JOURNAL_WINDOW", "2 hours ago")
+# claude-memory-sync is a timer-driven oneshot: `is-active` is "inactive" between
+# runs, so health is the LAST RESULT plus the timer still being scheduled.
+SYNC_UNIT = os.environ.get("SB_HEALTH_SYNC_UNIT", "claude-memory-sync.service")
+SYNC_TIMER = os.environ.get("SB_HEALTH_SYNC_TIMER", "claude-memory-sync.timer")
+# Backstop for the failure mode the unit checks miss entirely: everything green
+# while nothing is actually landing in the store.
+STORE_PATH = Path(os.environ.get(
+    "SB_HEALTH_STORE_PATH",
+    str(Path.home() / ".local/state/sacred-brain/hippocampus/hippocampus_memories.sqlite"),
+))
+STORE_STALE_HOURS = float(os.environ.get("SB_HEALTH_STORE_STALE_HOURS", "72"))
 DREAMS_DIR = Path(os.environ.get("DREAMS_OUTPUT_PATH", str(Path.home() / ".local/state/agent-memory/dreams")))
 STATE_DIR = Path(os.environ.get("MG_STATE_DIR", str(Path.home() / ".local/state/agent-memory/governor")))
 ALERT_COOLDOWN_SECONDS = int(os.environ.get("SB_HEALTH_ALERT_COOLDOWN_SECONDS", str(6 * 60 * 60)))
@@ -135,6 +148,59 @@ def check_dream_timer(messages: list[str]) -> None:
         warn(messages, "agent-memory-dream.timer is not listed as active")
 
 
+def check_timed_oneshot(messages: list[tuple[str, str]], unit: str, timer: str) -> None:
+    """A oneshot that fails every run is invisible to an is-active check."""
+    timers = run(["systemctl", "--user", "list-timers", timer, "--no-pager", "--no-legend"])
+    if timers.returncode != 0 or timer not in timers.stdout:
+        warn(messages, f"{timer} is not listed as active")
+
+    state = run(["systemctl", "--user", "show", unit, "-p", "Result", "-p", "ExecMainStatus"])
+    if state.returncode != 0:
+        warn(messages, f"could not read {unit} state: {state.stderr.strip()}")
+        return
+    fields = dict(
+        line.split("=", 1) for line in state.stdout.splitlines() if "=" in line
+    )
+    result = fields.get("Result", "").strip()
+    status = fields.get("ExecMainStatus", "").strip()
+    if result and result not in ("success", ""):
+        warn(messages, f"{unit} last run failed (Result={result}, exit={status or '?'})")
+
+
+def check_store_freshness(messages: list[tuple[str, str]]) -> None:
+    """Green units with a store that stopped growing is the silent-death case."""
+    if not STORE_PATH.exists():
+        warn(messages, f"memory store not found at {STORE_PATH}")
+        return
+    try:
+        connection = sqlite3.connect(f"file:{STORE_PATH}?mode=ro", uri=True)
+        try:
+            newest = connection.execute("SELECT MAX(created_at) FROM memories").fetchone()[0]
+        finally:
+            connection.close()
+    except Exception as exc:  # noqa: BLE001 - a broken store must warn, not crash.
+        warn(messages, f"could not read memory store {STORE_PATH}: {exc}")
+        return
+    if not newest:
+        warn(messages, "memory store is empty")
+        return
+    try:
+        newest_at = datetime.fromisoformat(str(newest))
+    except ValueError:
+        warn(messages, f"unparseable created_at in memory store: {newest!r}")
+        return
+    age_hours = (datetime.now() - newest_at).total_seconds() / 3600.0
+    if age_hours > STORE_STALE_HOURS:
+        # Soft: a genuinely quiet stretch is not an incident. Paired with the
+        # hard sync-unit check above, which catches the real breakage.
+        warn(
+            messages,
+            f"newest memory is {age_hours:.0f}h old (>{STORE_STALE_HOURS:.0f}h) — "
+            f"ingest may be stalled; check {SYNC_UNIT}",
+            severity="soft",
+        )
+
+
 def should_alert(body: str) -> bool:
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     path = STATE_DIR / "healthcheck-alert.json"
@@ -210,6 +276,8 @@ def main() -> None:
     messages: list[tuple[str, str]] = []
     check_user_service(messages, "hippocampus.service")
     check_user_service(messages, "memory-governor.service")
+    check_timed_oneshot(messages, SYNC_UNIT, SYNC_TIMER)
+    check_store_freshness(messages)
     check_dream_timer(messages)
     check_recent_consolidation(messages)
     check_dream_promotions(messages)
