@@ -142,7 +142,7 @@ function formatMemoryBlock(scopePath: string, results: RecallResult[]): string {
 	lines.push("");
 	lines.push(
 		"> Search long-term memory on demand: `sacred-search <query> [user_id] [limit]` " +
-		"(defaults: `user_id=sam`, `limit=5`). See `docs/AGENT_MEMORY_SEARCH.md` in the sacred-brain repo.",
+		"(defaults: `user_id=sam`, `limit=5`). See `docs/AGENT_MEMORY_SEARCH.md` in the agent-memory repo.",
 	);
 	lines.push("");
 	if (!results.length) {

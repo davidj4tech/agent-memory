@@ -19,7 +19,7 @@
 
 ```bash
 # 1. Clone the repo
-sudo git clone https://github.com/davidj4tech/sacred-brain.git /opt/sacred-brain
+sudo git clone https://github.com/davidj4tech/agent-memory.git /opt/sacred-brain
 cd /opt/sacred-brain
 
 # 2. Install

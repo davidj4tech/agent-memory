@@ -1,6 +1,6 @@
 [Unit]
 Description=agent-memory Hippocampus (memory store, user service)
-Documentation=https://github.com/davidj4tech/sacred-brain
+Documentation=https://github.com/davidj4tech/agent-memory
 After=network.target
 
 [Service]

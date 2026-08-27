@@ -51,7 +51,7 @@ Closes the loop. Without this, a hallucinated/obsolete memory only gets correcte
 
 ## 3. Hierarchical scopes
 
-Today `Scope = {kind: user|room|global, id}` is flat. For Claude Code / OpenCode, scopes need a project/topic dimension — "remember this for the sacred-brain repo, not globally for Sam."
+Today `Scope = {kind: user|room|global, id}` is flat. For Claude Code / OpenCode, scopes need a project/topic dimension — "remember this for the agent-memory repo, not globally for Sam."
 
 ### Change
 

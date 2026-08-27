@@ -102,7 +102,7 @@ If the app is one of the supported coding agents and you want pre-session memory
 | OpenCode | `./ops/opencode/install.sh` | `docs/OPENCODE_BRIDGE.md` |
 | Codex | `./ops/codex/install.sh` | `docs/CODEX_BRIDGE.md` |
 
-Run on homer only if editing the sacred-brain repo from homer. For other machines, copy the scripts over or run the installer from a checkout of sacred-brain on that machine.
+Run on homer only if editing the agent-memory repo from homer. For other machines, copy the scripts over or run the installer from a checkout of agent-memory on that machine.
 
 ### 3.3 User-level instruction file (coding agents)
 

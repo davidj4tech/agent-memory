@@ -27,7 +27,7 @@ models are independent; pick one per host.
 
 ```bash
 # 1. Clone the repo to the canonical user-mode location
-git clone https://github.com/davidj4tech/sacred-brain.git ~/projects/agent-memory
+git clone https://github.com/davidj4tech/agent-memory.git ~/projects/agent-memory
 cd ~/projects/agent-memory
 
 # 2. Install the Python package into a per-user pipx venv
