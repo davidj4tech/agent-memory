@@ -76,15 +76,23 @@ def walk_memories(root: Path) -> list[ParsedMemory]:
         # Skip the MEMORY.md index
         if md.name == "MEMORY.md":
             continue
-        raw = md.read_text(encoding="utf-8")
-        meta, body = parse_frontmatter(raw)
-        type_ = str(meta.get("type") or "project")
-        if type_ not in TYPE_MAP:
-            # unknown type — default to project/episodic
-            type_ = "project"
-        name = str(meta.get("name") or md.stem)
-        desc = str(meta.get("description") or "")
-        content_hash = hashlib.sha256((json.dumps(meta, sort_keys=True) + "\n" + body).encode()).hexdigest()
+        # One malformed file must not abort the whole sync.
+        try:
+            raw = md.read_text(encoding="utf-8")
+            meta, body = parse_frontmatter(raw)
+            type_ = str(meta.get("type") or "project")
+            if type_ not in TYPE_MAP:
+                # unknown type — default to project/episodic
+                type_ = "project"
+            name = str(meta.get("name") or md.stem)
+            desc = str(meta.get("description") or "")
+            # default=str: YAML turns unquoted timestamps (e.g. metadata.modified)
+            # into datetime objects, which json cannot serialise on its own.
+            fingerprint = json.dumps(meta, sort_keys=True, default=str)
+            content_hash = hashlib.sha256((fingerprint + "\n" + body).encode()).hexdigest()
+        except Exception as exc:
+            print(f"[SKIP] {md}: {exc}", file=sys.stderr)
+            continue
         project_slug = md.parent.parent.name
         out.append(ParsedMemory(
             path=md,
