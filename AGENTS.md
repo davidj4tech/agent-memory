@@ -30,9 +30,19 @@ See `docs/README.md` for the full docs index. `docs/ARCHITECTURE.md` + `docs/STA
 
 ## Ground rules
 
-- Don't edit `/home/ryer/projects/sacred-brain/` — that's a stale 2025 copy. The live tree is `/opt/sacred-brain/`.
+- `/home/ryer/projects/sacred-brain/` is a back-compat **symlink** to
+  `/home/ryer/projects/agent-memory/` — same tree, either path is fine to edit.
 - Hippocampus stays a dumb semantic store. New policy/lifecycle logic goes in the Governor.
-- Services run as the `sacred` user (nologin). State lives in `/var/lib/sacred-brain/`, config in `/etc/sacred-brain/`.
+- There are **two deployment layouts**, and they are not interchangeable:
+  - **User layout — this is the live one (red5).** Runs as `ryer` via
+    `systemctl --user`; state in `~/.local/state/agent-memory/`, config in
+    `~/.config/agent-memory/`, units in [`ops/systemd/user/`](ops/systemd/user/).
+  - **System layout.** Runs as the `sacred` user (nologin); state in
+    `/var/lib/sacred-brain/`, config in `/etc/sacred-brain/`, tree at
+    `/opt/sacred-brain/`, installed by the `Makefile`. This is what red4 ran;
+    red4 was decommissioned 2026-08-28 and no host currently uses it. It still
+    carries the old `sacred-brain` naming on purpose — don't "finish" that
+    rename without deciding to.
 - All new memory features should respect the `safe`/`raw` tier split and scope filtering — don't bypass them.
 
 ## Per-agent quirks
