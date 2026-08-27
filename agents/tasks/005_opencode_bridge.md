@@ -56,7 +56,7 @@ OpenCode's hook API is less settled than Claude Code's. Ship TWO mechanisms; the
 ### Outcome posting
 
 - No new script needed. `scripts/governor_outcome.sh` from task 004 is reusable as-is.
-- Document the same pending-outcome-file convention as Claude Code (`~/.cache/sacred-brain/opencode-pending-outcome.jsonl`, drained by a Stop-equivalent hook if OpenCode supports one, otherwise drained manually or by the launcher wrapper's `trap EXIT`).
+- Document the same pending-outcome-file convention as Claude Code (`~/.cache/agent-memory/opencode-pending-outcome.jsonl`, drained by a Stop-equivalent hook if OpenCode supports one, otherwise drained manually or by the launcher wrapper's `trap EXIT`).
 - The launcher wrapper gains a `trap` handler that drains the pending file on session exit:
   ```
   trap 'drain_outcomes opencode-pending-outcome.jsonl' EXIT
@@ -98,7 +98,7 @@ Must NOT:
 - Launcher wrapper round-trip:
   1. `opencode-with-governor` in `/opt/sacred-brain/` on sp4r.
   2. Session starts; `.agents/CONTEXT_MEMORY.md` is fresh.
-  3. Write a pending outcome line into `~/.cache/sacred-brain/opencode-pending-outcome.jsonl` during the session.
+  3. Write a pending outcome line into `~/.cache/agent-memory/opencode-pending-outcome.jsonl` during the session.
   4. Exit OpenCode; the drain fires via `trap EXIT`; the file is truncated; `/outcome` shows the posted event.
 - Cross-bridge parity: running `governor_context.sh` with `--target claude` and then `--target opencode` against the same scope produces two files whose bullet lists are identical (only the header comment differs).
 - `ops/opencode/install.sh` is idempotent — two runs leave the same end state.

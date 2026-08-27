@@ -2,14 +2,14 @@
 # _outcome_drain.sh — shared helper for draining pending-outcome files.
 #
 # Source this, then call `drain_outcomes <filename>`. The file lives under
-# ~/.cache/sacred-brain/. Each line is a JSON object matching the Governor's
+# ~/.cache/agent-memory/. Each line is a JSON object matching the Governor's
 # /outcome request body. Posted lines are removed; unposted lines are kept
 # (so a transient network failure doesn't discard queued outcomes).
 
 drain_outcomes() {
   _fname="$1"
   [ -n "$_fname" ] || return 0
-  _dir="${HOME}/.cache/sacred-brain"
+  _dir="${HOME}/.cache/agent-memory"
   _path="${_dir}/${_fname}"
   [ -r "$_path" ] || return 0
   [ -s "$_path" ] || return 0

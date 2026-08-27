@@ -15,7 +15,7 @@ Pi sessions automatically:
    into `.agents/CONTEXT_MEMORY.md` and into the system prompt at session start.
 2. POST the to-be-summarised tail to `/observe` with source `pi:precompact`
    on compaction (capped at 0.35 salience, parallel to the other agents).
-3. Drain `~/.cache/sacred-brain/pi-pending-outcome.jsonl` to `/outcome` on
+3. Drain `~/.cache/agent-memory/pi-pending-outcome.jsonl` to `/outcome` on
    session shutdown.
 
 ## Requirements
@@ -25,11 +25,11 @@ Pi sessions automatically:
 - All bridge operations must swallow errors (TTY/agent flow must never be
   broken by a Governor outage).
 - Env loading mirrors the bash bridges: `process.env` → `~/.config/hippocampus.env`
-  → `~/.config/sacred-brain.env`. Accept both `GOVERNOR_*` and `HIPPOCAMPUS_*`
+  → `~/.config/agent-memory.env`. Accept both `GOVERNOR_*` and `HIPPOCAMPUS_*`
   variable names with `GOVERNOR_*` taking precedence.
 - Add `"pi:precompact": 0.35` to `LOW_SALIENCE_SOURCES` in
   `memory_governor/mem_policy.py`.
-- Logs go to `~/.cache/sacred-brain/claude-bridge.log` (the shared bridge log,
+- Logs go to `~/.cache/agent-memory/claude-bridge.log` (the shared bridge log,
   same as the other bridges).
 - Backwards compat: must not change wire formats; `/recall`, `/observe`,
   `/outcome` request bodies match what the existing scripts send.

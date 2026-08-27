@@ -112,10 +112,10 @@ Deferred from task 003. Pure transport; the brains live in the endpoint.
   Uses `GOVERNOR_URL` / `GOVERNOR_API_KEY` like the other scripts.
 
 - `scripts/governor_session_outcome.sh` (invoked by Claude Code's `Stop` hook):
-  - Passive by default. Reads `~/.cache/sacred-brain/claude-pending-outcome.jsonl` — one line per pending outcome, written during the session by explicit user commands.
+  - Passive by default. Reads `~/.cache/agent-memory/claude-pending-outcome.jsonl` — one line per pending outcome, written during the session by explicit user commands.
   - Each line is the full `/outcome` request body. Script POSTs each, then truncates the file on success.
   - If the file is absent or empty: exit 0 silently. No automatic outcome inference in this task — defer that to a later task.
-  - Logs to `~/.cache/sacred-brain/claude-bridge.log` (same log as task 003 hooks).
+  - Logs to `~/.cache/agent-memory/claude-bridge.log` (same log as task 003 hooks).
 
 - Extend `ops/claude/install_hooks.sh` (from task 003) to also splice a `Stop` entry for `governor_session_outcome.sh`. Stay idempotent.
 

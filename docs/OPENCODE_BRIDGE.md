@@ -3,7 +3,7 @@
 Wires OpenCode (the CLI agent) to the Memory Governor. OpenCode reads `AGENTS.md` as its primary instruction surface and has no auto-memory system of its own, so the bridge just needs to drop recalled memories into a file OpenCode already reads.
 
 1. **Pre-session context pull** → `governor_context.sh --target opencode` writes the top-K memories for the current `project:<basename>/user:$GOVERNOR_USER_ID` scope to `.agents/CONTEXT_MEMORY.md` in the workspace. The pointer in the repo-root `AGENTS.md` tells any reading agent to treat that file as recalled memory.
-2. **Session exit** → the launcher wrapper drains `~/.cache/sacred-brain/opencode-pending-outcome.jsonl` to `/outcome` via `trap EXIT`, so outcomes queued during the session aren't lost if OpenCode doesn't expose a Stop-equivalent hook.
+2. **Session exit** → the launcher wrapper drains `~/.cache/agent-memory/opencode-pending-outcome.jsonl` to `/outcome` via `trap EXIT`, so outcomes queued during the session aren't lost if OpenCode doesn't expose a Stop-equivalent hook.
 3. **PreCompact** → if/when OpenCode gains a compaction hook, scripts would POST to `/observe` with source `opencode:precompact`; `mem_policy.classify_observation` already caps that source at 0.35 salience.
 
 `.agents/CONTEXT_MEMORY.md` is agent-neutral — the same file format (only the header comment differs) is used by Claude Code at `.claude/CONTEXT_MEMORY.md`. A future third agent can reuse the same path without more plumbing.
@@ -44,7 +44,7 @@ p8a (phone) is skipped until OpenCode's Termux story is clearer.
 
 ## Outcomes
 
-No OpenCode-specific script. Agents queue outcome events as JSON lines into `~/.cache/sacred-brain/opencode-pending-outcome.jsonl`; the launcher wrapper drains on exit. Each line matches the `/outcome` request body:
+No OpenCode-specific script. Agents queue outcome events as JSON lines into `~/.cache/agent-memory/opencode-pending-outcome.jsonl`; the launcher wrapper drains on exit. Each line matches the `/outcome` request body:
 
 ```json
 {"memory_id": "m_123", "outcome": "used", "session_id": "…"}
@@ -58,7 +58,7 @@ Stop invoking `opencode-with-governor` (remove the alias if you added one). The 
 
 ## Logs
 
-- `~/.cache/sacred-brain/claude-bridge.log` — shared bridge log; `_outcome_drain.sh` writes drain results here regardless of caller.
+- `~/.cache/agent-memory/claude-bridge.log` — shared bridge log; `_outcome_drain.sh` writes drain results here regardless of caller.
 - Governor stream log — all `/observe` and `/outcome` events.
 
 ## Troubleshooting

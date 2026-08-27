@@ -11,7 +11,7 @@
  *                            (every turn; stable text → prompt-cache friendly)
  *   session_before_compact → POST /observe with the to-be-summarised tail
  *                            (source: pi:precompact, capped at 0.35 salience)
- *   session_shutdown       → drain ~/.cache/sacred-brain/pi-pending-outcome.jsonl
+ *   session_shutdown       → drain ~/.cache/agent-memory/pi-pending-outcome.jsonl
  *
  * Env (loaded from process.env, then ~/.config/hippocampus.env, then
  * ~/.config/agent-memory.env, in that order):
@@ -22,7 +22,7 @@
  *   PI_BRIDGE_INJECT   "0" disables system-prompt injection (default: enabled)
  *   PI_BRIDGE_DISABLE  "1" disables the whole bridge
  *
- * Logs to ~/.cache/sacred-brain/claude-bridge.log (shared bridge log).
+ * Logs to ~/.cache/agent-memory/claude-bridge.log (shared bridge log).
  *
  * All operations swallow errors — bridge failure must never break a pi session.
  */
@@ -76,7 +76,7 @@ const RECALL_K = Number(envOf("PI_BRIDGE_K") || "20") || 20;
 const DISABLED = envOf("PI_BRIDGE_DISABLE") === "1";
 const INJECT = envOf("PI_BRIDGE_INJECT") !== "0";
 
-const CACHE_DIR = join(HOME, ".cache/sacred-brain");
+const CACHE_DIR = join(HOME, ".cache/agent-memory");
 const OUTCOME_QUEUE = join(CACHE_DIR, "pi-pending-outcome.jsonl");
 const LOG_FILE = join(CACHE_DIR, "claude-bridge.log");
 

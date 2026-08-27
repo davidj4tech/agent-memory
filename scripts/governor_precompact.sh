@@ -3,12 +3,12 @@
 #
 # Reads the transcript path from the hook's JSON input on stdin and POSTs
 # the last ~2000 words to the Governor's /observe endpoint so salient
-# details survive compaction. Logs to ~/.cache/sacred-brain/claude-bridge.log
+# details survive compaction. Logs to ~/.cache/agent-memory/claude-bridge.log
 # and never fails loudly — compaction must proceed regardless.
 
 set -u
 
-LOG_DIR="${HOME}/.cache/sacred-brain"
+LOG_DIR="${HOME}/.cache/agent-memory"
 LOG="${LOG_DIR}/claude-bridge.log"
 mkdir -p "$LOG_DIR"
 

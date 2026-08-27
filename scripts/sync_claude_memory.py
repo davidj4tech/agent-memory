@@ -167,7 +167,7 @@ def post_remember(
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=str(Path.home() / ".claude" / "projects"))
-    ap.add_argument("--ledger", default=str(Path.home() / ".cache" / "sacred-brain" / "claude-sync-ledger.json"))
+    ap.add_argument("--ledger", default=str(Path.home() / ".cache" / "agent-memory" / "claude-sync-ledger.json"))
     ap.add_argument("--user-id", default=os.environ.get("AGENT_MEMORY_USER_ID") or os.environ.get("GOVERNOR_USER_ID", "sam"))
     ap.add_argument("--governor-url", default=os.environ.get("AGENT_MEMORY_GOVERNOR_URL") or os.environ.get("GOVERNOR_URL", "http://127.0.0.1:54323"))
     ap.add_argument("--api-key", default=os.environ.get("AGENT_MEMORY_API_KEY") or os.environ.get("GOVERNOR_API_KEY"))

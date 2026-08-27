@@ -31,7 +31,7 @@ SYNC_TIMER = os.environ.get("SB_HEALTH_SYNC_TIMER", "claude-memory-sync.timer")
 # while nothing is actually landing in the store.
 STORE_PATH = Path(os.environ.get(
     "SB_HEALTH_STORE_PATH",
-    str(Path.home() / ".local/state/sacred-brain/hippocampus/hippocampus_memories.sqlite"),
+    str(Path.home() / ".local/state/agent-memory/hippocampus/hippocampus_memories.sqlite"),
 ))
 STORE_STALE_HOURS = float(os.environ.get("SB_HEALTH_STORE_STALE_HOURS", "72"))
 DREAMS_DIR = Path(os.environ.get("DREAMS_OUTPUT_PATH", str(Path.home() / ".local/state/agent-memory/dreams")))

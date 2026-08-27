@@ -30,7 +30,7 @@ Install from `/opt/sacred-brain/scripts/`:
   - Exits 0 on empty recall (no memories yet is not an error).
   - Idempotent: overwrites its own output file only; never appends.
 
-- `scripts/governor_precompact.sh` — called by Claude Code's `PreCompact` hook. Reads the transcript path from the hook input ($CLAUDE_TRANSCRIPT or arg), extracts the last ~2000 tokens, POSTs to `/observe` with `source="claude-code:precompact"` and scope matching the current project. Never fails loudly (logs to `~/.cache/sacred-brain/claude-bridge.log`); compaction must proceed regardless.
+- `scripts/governor_precompact.sh` — called by Claude Code's `PreCompact` hook. Reads the transcript path from the hook input ($CLAUDE_TRANSCRIPT or arg), extracts the last ~2000 tokens, POSTs to `/observe` with `source="claude-code:precompact"` and scope matching the current project. Never fails loudly (logs to `~/.cache/agent-memory/claude-bridge.log`); compaction must proceed regardless.
 
 - `scripts/sync_claude_memory.py` — one-shot sync of Claude Code's auto-memory dir into the Governor.
   - Walks `~/.claude/projects/*/memory/*.md` (path configurable via `--root`).
@@ -44,7 +44,7 @@ Install from `/opt/sacred-brain/scripts/`:
     | `reference` | `semantic`   | 0.75 |
 
   - Scope: `project:<dirname-of-projects-subdir>/user:$GOVERNOR_USER_ID` for files under that subdir. Files with `type: user` or `type: reference` also get a duplicate post at bare `user:$GOVERNOR_USER_ID` so they surface in non-project sessions too.
-  - Idempotency: local ledger at `~/.cache/sacred-brain/claude-sync-ledger.json` mapping `{absolute_path: sha256(frontmatter+body)}`. Only POST when hash changes. `--force` re-sends everything.
+  - Idempotency: local ledger at `~/.cache/agent-memory/claude-sync-ledger.json` mapping `{absolute_path: sha256(frontmatter+body)}`. Only POST when hash changes. `--force` re-sends everything.
   - `--dry-run` prints what it would POST without hitting the network.
   - `--watch` mode uses `inotifywait` (graceful skip if not installed) to mirror edits live.
 
@@ -106,7 +106,7 @@ Must NOT:
   2. From homer (persona `sam`), open a session in a matching project; `CONTEXT_MEMORY.md` must NOT contain mel's memory (different `user:` leaf).
   3. From melr, open a session in the same project; `CONTEXT_MEMORY.md` MUST contain it.
   4. Proves `GOVERNOR_USER_ID` correctly scopes recall per persona, even though the same human (david) is behind both.
-- Manual on homer: `tail ~/.cache/sacred-brain/claude-bridge.log` shows no stack traces after a day of normal use.
+- Manual on homer: `tail ~/.cache/agent-memory/claude-bridge.log` shows no stack traces after a day of normal use.
 - Installer idempotency: running `install_hooks.sh` twice leaves `~/.claude/settings.json` valid JSON with exactly one entry per hook type.
 
 ## References

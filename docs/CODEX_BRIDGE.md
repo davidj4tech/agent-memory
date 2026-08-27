@@ -7,7 +7,7 @@ For the agent-neutral design details — why the drop-file is shared across Open
 ## How it works
 
 1. **Pre-session context pull** → `governor_context.sh --target codex` writes the top-K memories for `project:<basename>/user:$GOVERNOR_USER_ID` to `.agents/CONTEXT_MEMORY.md`. Same output as `--target opencode` and `--target agents`; they're aliases.
-2. **Session exit** → the launcher wrapper drains `~/.cache/sacred-brain/codex-pending-outcome.jsonl` via `trap EXIT`.
+2. **Session exit** → the launcher wrapper drains `~/.cache/agent-memory/codex-pending-outcome.jsonl` via `trap EXIT`.
 3. **PreCompact** → if Codex gains a compaction hook, posts tagged `codex:precompact` are already salience-capped at 0.35 in `mem_policy.LOW_SALIENCE_SOURCES`.
 
 ## Install (per machine)
@@ -40,7 +40,7 @@ Same pattern as the Claude and OpenCode bridges. Put in `~/.config/hippocampus.e
 
 ## Outcomes
 
-Queue outcome events as JSON lines into `~/.cache/sacred-brain/codex-pending-outcome.jsonl`; the launcher wrapper drains them on exit. Each line matches the `/outcome` request body. Failed POSTs stay queued for the next drain.
+Queue outcome events as JSON lines into `~/.cache/agent-memory/codex-pending-outcome.jsonl`; the launcher wrapper drains them on exit. Each line matches the `/outcome` request body. Failed POSTs stay queued for the next drain.
 
 ## Disabling
 
@@ -48,7 +48,7 @@ Stop invoking `codex-with-governor` (remove the alias if you added one). The sym
 
 ## Logs
 
-- `~/.cache/sacred-brain/claude-bridge.log` — shared bridge log; `_outcome_drain.sh` writes drain results here.
+- `~/.cache/agent-memory/claude-bridge.log` — shared bridge log; `_outcome_drain.sh` writes drain results here.
 - Governor stream log — all `/observe` and `/outcome` events.
 
 ## Troubleshooting

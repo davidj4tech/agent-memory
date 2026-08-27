@@ -15,7 +15,7 @@ The bridge subscribes to four pi lifecycle events:
 | `session_start`        | POST `/recall` for `project:<basename(cwd)>/user:$GOVERNOR_USER_ID`, write the result to `.agents/CONTEXT_MEMORY.md`, and cache it in memory. |
 | `before_agent_start`   | Append the cached memory block to `event.systemPrompt`. Stable text → friendly to provider prompt-cache. Disable with `PI_BRIDGE_INJECT=0`. |
 | `session_before_compact` | POST the to-be-summarised tail to `/observe` with `source: "pi:precompact"`. Salience is capped at 0.35 in `mem_policy.LOW_SALIENCE_SOURCES`. |
-| `session_shutdown`     | Drain `~/.cache/sacred-brain/pi-pending-outcome.jsonl` to `/outcome`. Failed lines stay queued for next time. |
+| `session_shutdown`     | Drain `~/.cache/agent-memory/pi-pending-outcome.jsonl` to `/outcome`. Failed lines stay queued for next time. |
 
 `.agents/CONTEXT_MEMORY.md` uses the same agent-neutral format as the
 OpenCode/Codex bridges, so a workspace switching between agents sees a
@@ -63,7 +63,7 @@ Authoritative per-machine values: [`user-config/machines.md`](user-config/machin
 ## Outcomes
 
 Same convention as the sibling bridges. Append JSON lines matching the
-Governor `/outcome` body to `~/.cache/sacred-brain/pi-pending-outcome.jsonl`.
+Governor `/outcome` body to `~/.cache/agent-memory/pi-pending-outcome.jsonl`.
 The bridge drains them on `session_shutdown`. Failed posts stay queued.
 
 ```json
@@ -79,7 +79,7 @@ Two options:
 
 ## Logs
 
-- `~/.cache/sacred-brain/claude-bridge.log` — shared bridge log; pi-bridge
+- `~/.cache/agent-memory/claude-bridge.log` — shared bridge log; pi-bridge
   events are tagged `pi-bridge`.
 - Governor stream log — all `/observe` and `/outcome` events.
 
@@ -87,7 +87,7 @@ Two options:
 
 - **`.agents/CONTEXT_MEMORY.md` empty or stale.** Check `GOVERNOR_URL`
   reachable: `curl $GOVERNOR_URL/health`. The recall has a 2 s timeout and
-  graceful-degrades on error. Watch `~/.cache/sacred-brain/claude-bridge.log`
+  graceful-degrades on error. Watch `~/.cache/agent-memory/claude-bridge.log`
   for `pi-bridge recall: …` lines.
 - **`recall: http 404`.** You're hitting Hippocampus (`:54321`) instead of
   the Governor (`:54323`). Set `GOVERNOR_URL` explicitly.
