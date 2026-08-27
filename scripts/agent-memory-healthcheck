@@ -14,29 +14,45 @@ from pathlib import Path
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
-ZERO_STREAK_LIMIT = int(os.environ.get("SB_HEALTH_ZERO_PROMOTION_STREAK", "3"))
+# Health knobs are read as AGENT_MEMORY_HEALTH_<NAME>. The historical SB_HEALTH_
+# and SACRED_BRAIN_HEALTH_ spellings are still honoured so overrides set outside
+# this repo — unit drop-ins, shell profiles, other hosts — keep working.
+LEGACY_HEALTH_PREFIXES = ("SB_HEALTH_", "SACRED_BRAIN_HEALTH_")
+
+
+def health_env(name: str, default: str | None = None) -> str | None:
+    """Read AGENT_MEMORY_HEALTH_<name>, falling back to the legacy prefixes."""
+    candidates = (f"AGENT_MEMORY_HEALTH_{name}", *(prefix + name for prefix in LEGACY_HEALTH_PREFIXES))
+    for candidate in candidates:
+        value = os.environ.get(candidate)
+        if value is not None:
+            return value
+    return default
+
+
+ZERO_STREAK_LIMIT = int(health_env("ZERO_PROMOTION_STREAK", "3"))
 # A zero-promotion streak is only a genuine failure if the sweep had real input to
 # work with. When the cumulative input_event_count across the streak window meets or
 # exceeds this threshold, the sweep is overlooking signal (hard); below it the stream
 # was simply quiet and promoting nothing is correct (soft).
-ZERO_PROMOTION_MIN_INPUTS = int(os.environ.get("SB_HEALTH_ZERO_PROMOTION_MIN_INPUTS", "5"))
+ZERO_PROMOTION_MIN_INPUTS = int(health_env("ZERO_PROMOTION_MIN_INPUTS", "5"))
 # If the newest dream file is older than this, the sweep itself is likely stalled.
-DREAM_STALE_HOURS = float(os.environ.get("SB_HEALTH_DREAM_STALE_HOURS", "48"))
-JOURNAL_WINDOW = os.environ.get("SB_HEALTH_JOURNAL_WINDOW", "2 hours ago")
+DREAM_STALE_HOURS = float(health_env("DREAM_STALE_HOURS", "48"))
+JOURNAL_WINDOW = health_env("JOURNAL_WINDOW", "2 hours ago")
 # claude-memory-sync is a timer-driven oneshot: `is-active` is "inactive" between
 # runs, so health is the LAST RESULT plus the timer still being scheduled.
-SYNC_UNIT = os.environ.get("SB_HEALTH_SYNC_UNIT", "claude-memory-sync.service")
-SYNC_TIMER = os.environ.get("SB_HEALTH_SYNC_TIMER", "claude-memory-sync.timer")
+SYNC_UNIT = health_env("SYNC_UNIT", "claude-memory-sync.service")
+SYNC_TIMER = health_env("SYNC_TIMER", "claude-memory-sync.timer")
 # Backstop for the failure mode the unit checks miss entirely: everything green
 # while nothing is actually landing in the store.
-STORE_PATH = Path(os.environ.get(
-    "SB_HEALTH_STORE_PATH",
+STORE_PATH = Path(health_env(
+    "STORE_PATH",
     str(Path.home() / ".local/state/agent-memory/hippocampus/hippocampus_memories.sqlite"),
 ))
-STORE_STALE_HOURS = float(os.environ.get("SB_HEALTH_STORE_STALE_HOURS", "72"))
+STORE_STALE_HOURS = float(health_env("STORE_STALE_HOURS", "72"))
 DREAMS_DIR = Path(os.environ.get("DREAMS_OUTPUT_PATH", str(Path.home() / ".local/state/agent-memory/dreams")))
 STATE_DIR = Path(os.environ.get("MG_STATE_DIR", str(Path.home() / ".local/state/agent-memory/governor")))
-ALERT_COOLDOWN_SECONDS = int(os.environ.get("SB_HEALTH_ALERT_COOLDOWN_SECONDS", str(6 * 60 * 60)))
+ALERT_COOLDOWN_SECONDS = int(health_env("ALERT_COOLDOWN_SECONDS", str(6 * 60 * 60)))
 
 
 def run(cmd: list[str]) -> subprocess.CompletedProcess[str]:
@@ -217,15 +233,15 @@ def should_alert(body: str) -> bool:
 
 
 def send_matrix_alert(body: str) -> None:
-    if os.environ.get("SACRED_BRAIN_HEALTH_MATRIX") != "1":
+    if health_env("MATRIX") != "1":
         return
     homeserver = os.environ.get("MATRIX_HOMESERVER", "").rstrip("/")
     token = os.environ.get("MATRIX_ACCESS_TOKEN", "")
-    room_id = os.environ.get("SACRED_BRAIN_HEALTH_MATRIX_ROOM") or os.environ.get("MATRIX_ROOM_ALLOW", "").split(",")[0]
+    room_id = health_env("MATRIX_ROOM") or os.environ.get("MATRIX_ROOM_ALLOW", "").split(",")[0]
     if not homeserver or not token or not room_id:
         print("Matrix alert requested but MATRIX_HOMESERVER/TOKEN/ROOM is missing", file=sys.stderr)
         return
-    txn_id = f"sacred-brain-health-{int(time.time())}"
+    txn_id = f"agent-memory-health-{int(time.time())}"
     url = (
         f"{homeserver}/_matrix/client/v3/rooms/{quote(room_id, safe='')}/send/"
         f"m.room.message/{quote(txn_id, safe='')}"
@@ -259,11 +275,11 @@ def emit(messages: list[tuple[str, str]]) -> None:
 
     body = "agent-memory healthcheck warnings:\n- " + "\n- ".join(hard)
     print(body, file=sys.stderr)
-    if os.environ.get("SB_HEALTH_REPORT_ONLY") == "1":
+    if health_env("REPORT_ONLY") == "1":
         sys.exit(1)
     if should_alert(body):
         send_matrix_alert(body)
-        if os.environ.get("SACRED_BRAIN_HEALTH_WALL") == "1":
+        if health_env("WALL") == "1":
             wall = run(["bash", "-lc", "command -v wall"])
             if wall.stdout.strip():
                 subprocess.run(["wall", body], text=True, input="", check=False)
