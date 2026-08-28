@@ -68,19 +68,19 @@ After=hippocampus.service
 Type=oneshot
 User=sacred
 Group=sacred
-EnvironmentFile=/etc/sacred-brain/hippocampus.env
+EnvironmentFile=/etc/agent-memory/hippocampus.env
 Environment=MEMORY_SYNC_ROOT=/opt/mybot
 Environment=HIPPOCAMPUS_USER_ID=mybot
-Environment=HIPPOCAMPUS_SQLITE_PATH=/var/lib/sacred-brain/hippocampus/hippocampus_memories.sqlite
-ExecStart=/opt/sacred-brain/.venv/bin/python /opt/sacred-brain/scripts/memory_sync.py push
+Environment=HIPPOCAMPUS_SQLITE_PATH=/var/lib/agent-memory/hippocampus/hippocampus_memories.sqlite
+ExecStart=/usr/local/bin/agent-memory-file-sync push
 
 # Hardening
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
-ReadWritePaths=/var/lib/sacred-brain
-ReadOnlyPaths=/opt/sacred-brain /opt/mybot /etc/sacred-brain
+ReadWritePaths=/var/lib/agent-memory
+ReadOnlyPaths=/opt/pipx /opt/mybot /etc/agent-memory
 ProtectKernelTunables=true
 ProtectKernelModules=true
 
@@ -112,23 +112,23 @@ sudo -u sacred \
   MEMORY_SYNC_ROOT=/opt/mybot \
   HIPPOCAMPUS_USER_ID=mybot \
   HIPPOCAMPUS_API_KEY=hippo_local_a58b583f7a844f0eb3bc02e58d56f5bd \
-  HIPPOCAMPUS_SQLITE_PATH=/var/lib/sacred-brain/hippocampus/hippocampus_memories.sqlite \
-  /opt/sacred-brain/.venv/bin/python /opt/sacred-brain/scripts/memory_sync.py push --dry-run
+  HIPPOCAMPUS_SQLITE_PATH=/var/lib/agent-memory/hippocampus/hippocampus_memories.sqlite \
+  /usr/local/bin/agent-memory-file-sync push --dry-run
 
 # Push for real
 sudo -u sacred \
   MEMORY_SYNC_ROOT=/opt/mybot \
   HIPPOCAMPUS_USER_ID=mybot \
   HIPPOCAMPUS_API_KEY=hippo_local_a58b583f7a844f0eb3bc02e58d56f5bd \
-  HIPPOCAMPUS_SQLITE_PATH=/var/lib/sacred-brain/hippocampus/hippocampus_memories.sqlite \
-  /opt/sacred-brain/.venv/bin/python /opt/sacred-brain/scripts/memory_sync.py push
+  HIPPOCAMPUS_SQLITE_PATH=/var/lib/agent-memory/hippocampus/hippocampus_memories.sqlite \
+  /usr/local/bin/agent-memory-file-sync push
 
 # Run again — should show pushed=0 (dedup working)
 ```
 
 ### 5. Add the timer to the justfile (optional)
 
-Edit `/opt/sacred-brain/justfile` and add the new timer to the `timers` recipe:
+Edit the `justfile` in your checkout and add the new timer to the `timers` recipe:
 
 ```
 @systemctl list-timers ... hippocampus-memory-sync-mybot.timer --no-pager
@@ -142,7 +142,7 @@ Edit `/opt/sacred-brain/justfile` and add the new timer to the `timers` recipe:
 | `HIPPOCAMPUS_URL` | `http://127.0.0.1:54321` | Hippocampus API URL |
 | `HIPPOCAMPUS_API_KEY` | *(empty)* | API key for Hippocampus auth |
 | `HIPPOCAMPUS_USER_ID` | `default` | User ID to store memories under |
-| `HIPPOCAMPUS_SQLITE_PATH` | `/var/lib/sacred-brain/hippocampus/hippocampus_memories.sqlite` | SQLite path for hash-based dedup |
+| `HIPPOCAMPUS_SQLITE_PATH` | `/var/lib/agent-memory/hippocampus/hippocampus_memories.sqlite` | SQLite path for hash-based dedup |
 
 ## Existing Setup: Sam
 

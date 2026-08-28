@@ -1,7 +1,7 @@
 /**
  * sacred-brain-bridge: pi ↔ Memory Governor integration
  *
- * Sibling of the codex / opencode / claude-code bridges in /opt/sacred-brain.
+ * Sibling of the codex / opencode / claude-code bridges in this repo.
  * Pi has a typed event API instead of a shell-hook config slot, so this is a
  * TypeScript extension rather than a launcher wrapper.
  *

@@ -4,22 +4,22 @@ After=network.target
 
 [Service]
 Type=simple
-EnvironmentFile=/etc/sacred-brain/hippocampus.env
+EnvironmentFile=/etc/agent-memory/hippocampus.env
 # Shared API keys rendered from the sops secrets store; optional (-), loaded
 # second so it wins where keys overlap. No key literals in the file above.
-EnvironmentFile=-/etc/sacred-brain/secrets.env
+EnvironmentFile=-/etc/agent-memory/secrets.env
 ExecStart=/usr/local/bin/hippocampus
 Restart=on-failure
-User=sacred
-Group=sacred
+User=agent-memory
+Group=agent-memory
 
 # Hardening
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
-ReadWritePaths=/var/lib/sacred-brain
-ReadOnlyPaths=/opt/pipx /etc/sacred-brain
+ReadWritePaths=/var/lib/agent-memory
+ReadOnlyPaths=/opt/pipx /etc/agent-memory
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true

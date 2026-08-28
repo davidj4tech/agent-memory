@@ -4,20 +4,19 @@ After=network.target
 
 [Service]
 Type=oneshot
-WorkingDirectory=/opt/sacred-brain
-User=sacred
-Group=sacred
-Environment=HIPPOCAMPUS_SQLITE_PATH=/var/lib/sacred-brain/hippocampus/hippocampus_memories.sqlite
-Environment=AUTO_TUNE_PATH=/var/lib/sacred-brain/auto_memory_tuning.json
-ExecStart=/opt/pipx/venvs/agent-memory/bin/python scripts/auto_memory_tuner.py
+User=agent-memory
+Group=agent-memory
+Environment=HIPPOCAMPUS_SQLITE_PATH=/var/lib/agent-memory/hippocampus/hippocampus_memories.sqlite
+Environment=AUTO_TUNE_PATH=/var/lib/agent-memory/auto_memory_tuning.json
+ExecStart=/usr/local/bin/agent-memory-tune
 
 # Hardening
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
-ReadWritePaths=/var/lib/sacred-brain
-ReadOnlyPaths=/opt/sacred-brain /opt/pipx
+ReadWritePaths=/var/lib/agent-memory
+ReadOnlyPaths=/opt/pipx
 ProtectKernelTunables=true
 ProtectKernelModules=true
 

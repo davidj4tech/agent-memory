@@ -5,12 +5,12 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=sacred
-Group=sacred
-EnvironmentFile=/etc/sacred-brain/memory-governor.env
+User=agent-memory
+Group=agent-memory
+EnvironmentFile=/etc/agent-memory/memory-governor.env
 # Shared API keys (LITELLM_API_KEY, HIPPOCAMPUS_API_KEY) rendered from the sops
 # secrets store; optional (-), loaded second so it wins. No key literals above.
-EnvironmentFile=-/etc/sacred-brain/secrets.env
+EnvironmentFile=-/etc/agent-memory/secrets.env
 ExecStart=/usr/local/bin/memory-governor
 Restart=always
 RestartSec=3
@@ -20,8 +20,8 @@ NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
-ReadWritePaths=/var/lib/sacred-brain
-ReadOnlyPaths=/opt/pipx /etc/sacred-brain
+ReadWritePaths=/var/lib/agent-memory
+ReadOnlyPaths=/opt/pipx /etc/agent-memory
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true

@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
-# Print a friendly post-install summary. If any /etc/sacred-brain/* config
-# still contains CHANGE_ME placeholders, tell the operator to edit them
-# before starting services.
+# Print a friendly post-install summary. If any config still contains
+# CHANGE_ME placeholders, tell the operator to edit them before starting
+# services.
 set -euo pipefail
 
-ETC_DIR="${1:-/etc/sacred-brain}"
+ETC_DIR="${1:-/etc/agent-memory}"
+STATE_DIR="${2:-/var/lib/agent-memory}"
 
 echo ""
-echo "  Sacred Brain installed."
+echo "  agent-memory installed."
 echo ""
 echo "    Config: $ETC_DIR/"
-echo "    State:  /var/lib/sacred-brain/"
-echo "    Code:   /opt/pipx/venvs/agent-memory/"
+echo "    State:  $STATE_DIR/"
+echo "    Code:   /opt/pipx/venvs/agent-memory/   (no source tree needed)"
 echo ""
 
 if [[ -d "$ETC_DIR" ]] && grep -rlE 'CHANGE[_-]ME' "$ETC_DIR" >/dev/null 2>&1; then

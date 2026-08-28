@@ -23,7 +23,7 @@ tying to a specific client. Route:
 ## Running
 
 ```bash
-cd /opt/sacred-brain
+cd /path/to/agent-memory   # your checkout
 source .venv/bin/activate
 uvicorn ingest.hippocampus_ingest:app --host 0.0.0.0 --port 54322
 ```

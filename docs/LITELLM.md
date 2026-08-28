@@ -6,7 +6,7 @@ runs the proxy on `127.0.0.1:4000` by default.
 ## Install
 Use the repo venv:
 ```bash
-cd /opt/sacred-brain
+cd /path/to/agent-memory   # your checkout
 source .venv/bin/activate
 pip install "litellm[proxy]"
 ```
@@ -28,8 +28,7 @@ GROQ_API_KEY=...
 
 ## Run (manual)
 ```bash
-source /opt/sacred-brain/.venv/bin/activate
-litellm --config /opt/sacred-brain/ops/litellm/config.yaml --port 4000 --host 127.0.0.1
+litellm --config /etc/agent-memory/compose/litellm/config.yaml --port 4000 --host 127.0.0.1
 ```
 
 ## Systemd (Docker Compose)
@@ -42,7 +41,7 @@ Install/enable (as root):
 ```bash
 sudo mkdir -p /etc/litellm
 sudo touch /etc/litellm/litellm.env   # add provider keys here
-sudo cp /opt/sacred-brain/ops/systemd/litellm-compose.service /etc/systemd/system/
+sudo cp /etc/systemd/system/litellm-compose.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now litellm-compose.service
 ```

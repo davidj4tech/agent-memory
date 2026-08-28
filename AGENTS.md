@@ -37,12 +37,12 @@ See `docs/README.md` for the full docs index. `docs/ARCHITECTURE.md` + `docs/STA
   - **User layout — this is the live one (red5).** Runs as `ryer` via
     `systemctl --user`; state in `~/.local/state/agent-memory/`, config in
     `~/.config/agent-memory/`, units in [`ops/systemd/user/`](ops/systemd/user/).
-  - **System layout.** Runs as the `sacred` user (nologin); state in
-    `/var/lib/sacred-brain/`, config in `/etc/sacred-brain/`, tree at
-    `/opt/sacred-brain/`, installed by the `Makefile`. This is what red4 ran;
-    red4 was decommissioned 2026-08-28 and no host currently uses it. It still
-    carries the old `sacred-brain` naming on purpose — don't "finish" that
-    rename without deciding to.
+  - **System layout.** Runs as the `agent-memory` user (nologin); state in
+    `/var/lib/agent-memory/`, config in `/etc/agent-memory/`, docs in
+    `/usr/local/share/agent-memory/docs/`, installed by the `Makefile`. There
+    is **no source tree on a deployed host**: every unit invokes a console
+    script from the pipx venv, so a checkout is build-time only. No host
+    currently runs this layout (red4 was decommissioned 2026-08-28).
 - All new memory features should respect the `safe`/`raw` tier split and scope filtering — don't bypass them.
 
 ## Per-agent quirks

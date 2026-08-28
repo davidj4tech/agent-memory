@@ -19,7 +19,10 @@ import datetime as dt
 
 from pathlib import Path
 
-DEFAULT_DB = Path(__file__).resolve().parents[1] / "data" / "hippocampus_memories.sqlite"
+# A deployed host has no source tree, so the default cannot be derived from
+# __file__. The units set HIPPOCAMPUS_SQLITE_PATH explicitly; this is the
+# system-layout fallback.
+DEFAULT_DB = Path("/var/lib/agent-memory/hippocampus/hippocampus_memories.sqlite")
 import os
 import sqlite3
 import sys
@@ -233,12 +236,22 @@ def main(user_ids: list[str]) -> int:
     return total
 
 
-if __name__ == "__main__":
+def run() -> int:
+    """Console-script entry point (`agent-memory-prune`).
+
+    main() takes the user list as an argument; this resolves it from argv or
+    the store, which is what the old __main__ block did.
+    """
     users = sys.argv[1:]
     if not users and SQLITE_PATH and Path(SQLITE_PATH).exists():
         users = fetch_user_ids_from_sqlite(SQLITE_PATH)
     if not users:
-        print("Usage: prune_auto_memories.py <user_id> [user_id...] or set HIPPOCAMPUS_SQLITE_PATH", file=sys.stderr)
-        sys.exit(1)
+        print("Usage: agent-memory-prune <user_id> [user_id...] or set HIPPOCAMPUS_SQLITE_PATH", file=sys.stderr)
+        return 1
     deleted = main(users)
     print(f"Deleted {deleted} auto memories")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(run())

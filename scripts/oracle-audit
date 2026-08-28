@@ -1,4 +1,4 @@
-#!/opt/sacred-brain/.venv/bin/python
+#!/usr/bin/env python3
 """Audit the dreaming oracle layer on real runtime data.
 
 Read-only. Reports:
@@ -208,7 +208,7 @@ def main() -> int:
     p.add_argument("--days", type=int, default=14)
     p.add_argument("--json", action="store_true")
     p.add_argument("--dreams-dir", type=Path,
-                   default=Path("/opt/sacred-brain/var/dreams"))
+                   default=Path("/var/lib/agent-memory/dreams"))
     args = p.parse_args()
 
     cfg = load_config()

@@ -49,11 +49,11 @@ If you're looking for "that thing I discussed with ChatGPT", try both `sam` (raw
 Already installed on homer as `agent-memory-search` and `sacred-search`. For other machines:
 
 ```
-ln -sf /opt/sacred-brain/scripts/agent-memory-search ~/.local/bin/agent-memory-search
-ln -sf /opt/sacred-brain/scripts/sacred-search ~/.local/bin/sacred-search
+ln -sf /usr/local/bin/agent-memory-search ~/.local/bin/agent-memory-search
+ln -sf /usr/local/bin/sacred-search ~/.local/bin/sacred-search
 ```
 
-…or include `/opt/sacred-brain/scripts/` in your `$PATH`.
+…or include `/usr/local/bin/` in your `$PATH`.
 
 ## How agents discover it
 

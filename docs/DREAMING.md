@@ -90,7 +90,7 @@ inputs:
 Score every memory for a user and print a pass/fail table. Writes nothing.
 
 ```bash
-PYTHONPATH=/opt/sacred-brain python scripts/dream_sweep.py \
+/usr/local/bin/agent-memory-dream \
   --user-id sam --limit 200
 ```
 
@@ -167,7 +167,7 @@ REM writes its narrative entry per sweep to a target resolved as:
 
 1. `DREAMS_OUTPUT_PATH` env var
 2. Per-package default (downstream packages pass this in code)
-3. Sacred-brain default: `/opt/sacred-brain/var/dreams/`
+3. Sacred-brain default: `/var/lib/agent-memory/dreams/`
 
 Behavior by target shape:
 

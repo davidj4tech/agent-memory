@@ -21,20 +21,39 @@ dependencies = [
   # with the whole `mcp.server.fastmcp` module. On a 1.x the import fails and
   # the client reports only "-32000: Connection closed", which reads like auth.
   "mcp>=2",
+  # Used by the packaged CLIs (digest, file-sync, prune). It was only ever
+  # present transitively before these became entry points.
+  "requests>=2.31",
 ]
 
 [project.scripts]
 hippocampus = "brain.hippocampus.__main__:main"
 memory-governor = "memory_governor.app:run"
+# Everything the systemd units invoke is a console script, so a deployed host
+# needs the venv only — no source checkout.
+agent-memory-dream = "agent_memory.cli.dream_sweep:main"
+agent-memory-digest = "agent_memory.cli.governor_digest:main"
+agent-memory-file-sync = "agent_memory.cli.memory_sync:main"
+agent-memory-prune = "agent_memory.cli.prune_auto_memories:run"
+agent-memory-tune = "agent_memory.cli.auto_memory_tuner:main"
+agent-memory-notes = "agent_memory.cli.mem0_org_sync:main"
+agent-memory-matrix-bot = "bots.matrix.mention_bot:run"
+agent-memory-matrix-autojoin = "bots.matrix.autojoin_bot:run"
 
 [tool.setuptools.packages.find]
-include = ["brain*", "memory_governor*", "agent_memory*"]
+include = ["brain*", "memory_governor*", "agent_memory*", "bots*"]
 namespaces = true
 
 [tool.setuptools.package-data]
 "agent_memory.prompts" = ["*.txt"]
 
 [project.optional-dependencies]
+# The Matrix bot entry points (agent-memory-matrix-bot / -matrix-autojoin)
+# need matrix-nio. Kept optional so a plain memory install stays light:
+#   pipx install '.[matrix]'
+matrix = [
+  "matrix-nio>=0.24",
+]
 # NB: kerykeion (Swiss Ephemeris / pyswisseph C build) is intentionally NOT a
 # dependency here. Astrology/natal computation belongs to the *astrotunes*
 # project, which owns kerykeion; sacred-brain's astrology code (memory_governor

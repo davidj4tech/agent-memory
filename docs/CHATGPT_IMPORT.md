@@ -12,7 +12,7 @@ This script reads a ChatGPT data export, uses an LLM to extract durable personal
 ## Quick Start
 
 ```bash
-cd /opt/sacred-brain
+cd /path/to/agent-memory   # your checkout
 
 # 1. Preview what will be extracted (dry run)
 .venv/bin/python scripts/import_chatgpt.py \

@@ -87,7 +87,7 @@ def record_passing_promotions(
     return count
 
 
-SACRED_BRAIN_DREAMS_DEFAULT = Path("/opt/sacred-brain/var/dreams")
+AGENT_MEMORY_DREAMS_DEFAULT = Path("/var/lib/agent-memory/dreams")
 
 
 def resolve_dreams_output_path(package_default: str | os.PathLike | None = None) -> Path:
@@ -97,14 +97,14 @@ def resolve_dreams_output_path(package_default: str | os.PathLike | None = None)
       1. `DREAMS_OUTPUT_PATH` env var
       2. `package_default` arg (downstream packages set this — e.g., a
          workspace-scoped install points it at `$WORKSPACE/DREAMS.md`)
-      3. sacred-brain default: `/opt/sacred-brain/var/dreams`
+      3. system-layout default: `/var/lib/agent-memory/dreams`
     """
     env = os.environ.get("DREAMS_OUTPUT_PATH")
     if env:
         return Path(env).expanduser()
     if package_default:
         return Path(package_default).expanduser()
-    return SACRED_BRAIN_DREAMS_DEFAULT
+    return AGENT_MEMORY_DREAMS_DEFAULT
 
 
 def dreams_target_for_today(

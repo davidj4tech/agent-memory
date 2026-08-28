@@ -4,11 +4,10 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/opt/sacred-brain
-EnvironmentFile=/opt/sacred-brain/.env.matrix
-ExecStart=/opt/sacred-brain/.venv/bin/python bots/matrix/autojoin_bot.py
-User=sacred
-Group=sacred
+EnvironmentFile=/etc/agent-memory/matrix.env
+ExecStart=/usr/local/bin/agent-memory-matrix-autojoin
+User=agent-memory
+Group=agent-memory
 Restart=on-failure
 
 [Install]

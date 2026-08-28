@@ -6,7 +6,7 @@ Legacy mention/DM bot. It now supports:
 - Optional STT for received voice notes (LiteLLM `/v1/audio/transcriptions`).
 
 ## Configuration
-Create `/opt/sacred-brain/.env.matrix` (or export env vars). Key vars:
+Create `/etc/agent-memory/matrix.env` (or export env vars). Key vars:
 ```
 MATRIX_HOMESERVER=https://matrix.ryer.org
 MATRIX_USER=@sam:ryer.org
@@ -33,7 +33,7 @@ BAIBOT_STT_TIMEOUT=20.0
 
 ## Running locally
 ```bash
-cd /opt/sacred-brain
+cd /path/to/agent-memory   # your checkout
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt  # includes matrix-nio, httpx

@@ -18,17 +18,17 @@
 ## Quick Start
 
 ```bash
-# 1. Clone the repo
-sudo git clone https://github.com/davidj4tech/agent-memory.git /opt/sacred-brain
-cd /opt/sacred-brain
+# 1. Clone the repo (anywhere — the checkout is build-time only)
+git clone https://github.com/davidj4tech/agent-memory.git
+cd agent-memory
 
 # 2. Install
 sudo make install
 
-# 3. Edit /etc/sacred-brain/* — replace CHANGE_ME values
-sudoedit /etc/sacred-brain/hippocampus.toml
-sudoedit /etc/sacred-brain/hippocampus.env
-sudoedit /etc/sacred-brain/memory-governor.env
+# 3. Edit /etc/agent-memory/* — replace CHANGE_ME values
+sudoedit /etc/agent-memory/hippocampus.toml
+sudoedit /etc/agent-memory/hippocampus.env
+sudoedit /etc/agent-memory/memory-governor.env
 
 # 4. Start the services
 sudo systemctl start hippocampus memory-governor
@@ -38,21 +38,28 @@ just health
 just timers
 ```
 
-The repo lives at `/opt/sacred-brain/` because the timer-target scripts
-(in `scripts/`) run from there. The Python services themselves run from a
-pipx-managed venv at `/opt/pipx/venvs/agent-memory/`, with
-`hippocampus` and `memory-governor` symlinked into `/usr/local/bin/`.
+The checkout is needed **only to run `make install`** — clone it wherever you
+like, and delete it afterwards if you want. Nothing at runtime reads from it:
+every unit invokes a console script from the pipx-managed venv at
+`/opt/pipx/venvs/agent-memory/`, symlinked into `/usr/local/bin/`.
+
+That was not always true. The units used to run loose files out of a source
+tree at `/opt/sacred-brain/`, which meant a deployed host had to keep a git
+checkout in sync with its installed package. The scripts are part of the
+package now (`agent_memory.cli.*`), so that whole class of drift is gone.
 
 ## What `make install` Does
 
 | Target | Action |
 |--------|--------|
-| `install-deps` | Creates `sacred` system user (nologin) and `/var/lib/sacred-brain/{hippocampus,governor,cache}` and `/etc/sacred-brain/` |
-| `migrate-legacy` | Removes any old `/opt/sacred-brain/.venv/` from a pre-pipx install (idempotent) |
-| `install-package` | `pipx install --force .` into `/opt/pipx/venvs/agent-memory/`, with `hippocampus` and `memory-governor` symlinks in `$(PREFIX)/bin/` |
-| `install-bin` | Installs `sacred-search` to `$(PREFIX)/bin/sacred-search` |
+| `install-deps` | Creates the `agent-memory` system user (nologin) and `/var/lib/agent-memory/{hippocampus,governor,cache,dreams,digests}` and `/etc/agent-memory/` |
+| `check-legacy` | Reports any leftover `/opt/sacred-brain`, `/etc/sacred-brain`, `/var/lib/sacred-brain` or `sacred` user. Advisory only — it never deletes, because those can hold an edited config or a live store |
+| `install-package` | `pipx install --force .` into `/opt/pipx/venvs/agent-memory/`, exposing every console script in `$(PREFIX)/bin/` |
+| `install-bin` | Installs `agent-memory-search` (and the `sacred-search` alias) to `$(PREFIX)/bin/` |
+| `install-compose` | Copies the compose stacks to `/etc/agent-memory/compose/<stack>/`, skipping any file already there |
+| `install-docs` | Installs `docs/*.md` to `$(PREFIX)/share/agent-memory/docs/` (the bot doc loader reads these) |
 | `install-systemd` | Copies all unit files from `ops/systemd/` to `/etc/systemd/system/`, runs `daemon-reload`, enables every unit with an `[Install]` section |
-| `install-config` | Copies `.example` templates to `/etc/sacred-brain/` (skips files that already exist) |
+| `install-config` | Copies `.example` templates to `/etc/agent-memory/` (skips files that already exist) |
 
 `make install` does **not** start services automatically — the operator
 edits `CHANGE_ME` values, then runs `systemctl start` manually.
@@ -62,7 +69,7 @@ edits `CHANGE_ME` values, then runs `systemctl start` manually.
 After pulling new code:
 
 ```bash
-cd /opt/sacred-brain
+cd /path/to/agent-memory   # your checkout
 sudo git pull
 sudo make install-update
 ```
@@ -77,7 +84,7 @@ files, runs `daemon-reload`, and restarts any enabled services.
 # remove sacred-search from $(PREFIX)/bin. Keeps configs and state.
 sudo make uninstall
 
-# Also remove /etc/sacred-brain, /var/lib/sacred-brain, and the 'sacred' user
+# Also remove /etc/agent-memory, /var/lib/agent-memory, and the 'sacred' user
 sudo make uninstall-purge
 ```
 
@@ -101,16 +108,22 @@ The Makefile honors standard variables for non-default installs and packagers:
 ## Directory Layout
 
 ```
-/opt/sacred-brain/                        ← repo clone (timer scripts run from here)
-/opt/pipx/venvs/agent-memory/ ← installed Python package (services run from here)
+/opt/pipx/venvs/agent-memory/             ← the only code on the host
 /usr/local/bin/hippocampus
 /usr/local/bin/memory-governor
-/usr/local/bin/sacred-search
-/etc/sacred-brain/                        ← configuration (not in repo)
+/usr/local/bin/agent-memory-dream         ← console scripts the timers invoke
+/usr/local/bin/agent-memory-digest
+/usr/local/bin/agent-memory-file-sync
+/usr/local/bin/agent-memory-prune
+/usr/local/bin/agent-memory-tune
+/usr/local/bin/agent-memory-notes
+/usr/local/bin/agent-memory-search
+/usr/local/share/agent-memory/docs/       ← docs as installed data
+/etc/agent-memory/                        ← configuration (not in repo)
     hippocampus.toml
     hippocampus.env
     memory-governor.env
-/var/lib/sacred-brain/                    ← state (not in repo)
+/var/lib/agent-memory/                    ← state (not in repo)
     hippocampus/
         hippocampus_memories.sqlite
         memories-denote/
@@ -177,8 +190,8 @@ All services run with:
 - `ProtectSystem=strict`
 - `ProtectHome=true`
 - `PrivateTmp=true`
-- `ReadWritePaths` limited to `/var/lib/sacred-brain`
-- `ReadOnlyPaths` for code (`/opt/pipx`, plus `/opt/sacred-brain` for timer scripts) and config (`/etc/sacred-brain`)
+- `ReadWritePaths` limited to `/var/lib/agent-memory`
+- `ReadOnlyPaths` for code (`/opt/pipx`) and config (`/etc/agent-memory`) — no source tree to grant access to
 
 Check security scores: `just security-audit`
 

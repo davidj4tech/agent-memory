@@ -4,19 +4,17 @@ After=hippocampus.service
 
 [Service]
 Type=oneshot
-WorkingDirectory=/opt/sacred-brain
-User=sacred
-Group=sacred
-Environment=PYTHONPATH=/opt/sacred-brain
-ExecStart=/opt/pipx/venvs/agent-memory/bin/python scripts/mem0_org_sync.py export --dir /var/lib/sacred-brain/hippocampus/memories-denote
+User=agent-memory
+Group=agent-memory
+ExecStart=/usr/local/bin/agent-memory-notes export --dir /var/lib/agent-memory/hippocampus/memories-denote
 
 # Hardening
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
-ReadWritePaths=/var/lib/sacred-brain
-ReadOnlyPaths=/opt/sacred-brain /opt/pipx
+ReadWritePaths=/var/lib/agent-memory
+ReadOnlyPaths=/opt/pipx
 ProtectKernelTunables=true
 ProtectKernelModules=true
 

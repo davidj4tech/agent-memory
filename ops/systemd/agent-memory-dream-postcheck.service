@@ -4,12 +4,12 @@ After=agent-memory-dream.timer
 
 [Service]
 Type=oneshot
-User=sacred
-Group=sacred
+User=agent-memory
+Group=agent-memory
 ExecStart=/bin/bash -lc '\
   set +e; \
-  OUT="/opt/sacred-brain/var/dreams/postcheck-$(date -u +%%Y-%%m-%%dT%%H%%M%%SZ).txt"; \
-  mkdir -p /opt/sacred-brain/var/dreams; \
+  OUT="/var/lib/agent-memory/dreams/postcheck-$(date -u +%%Y-%%m-%%dT%%H%%M%%SZ).txt"; \
+  mkdir -p /var/lib/agent-memory/dreams; \
   { \
     echo "# agent-memory-dream post-check"; \
     echo "generated: $(date -u +%%FT%%TZ)"; \
@@ -23,11 +23,11 @@ ExecStart=/bin/bash -lc '\
     echo "## journalctl -u agent-memory-dream --since \"3 days ago\""; \
     journalctl -u agent-memory-dream.service --since "3 days ago" --no-pager || true; \
     echo; \
-    echo "## ls /opt/sacred-brain/var/dreams/"; \
-    ls -la /opt/sacred-brain/var/dreams/ || true; \
+    echo "## ls /var/lib/agent-memory/dreams/"; \
+    ls -la /var/lib/agent-memory/dreams/ || true; \
     echo; \
     echo "## latest dream entry (if any)"; \
-    LATEST=$(ls -1t /opt/sacred-brain/var/dreams/*.md 2>/dev/null | head -1); \
+    LATEST=$(ls -1t /var/lib/agent-memory/dreams/*.md 2>/dev/null | head -1); \
     if [ -n "$LATEST" ]; then \
       echo "--- $LATEST ---"; \
       head -200 "$LATEST"; \
@@ -36,7 +36,7 @@ ExecStart=/bin/bash -lc '\
     fi; \
     echo; \
     echo "## dream_promotions (last 7 days)"; \
-    DB=/opt/sacred-brain/var/memory-governor/state.db; \
+    DB=/var/lib/agent-memory/memory-governor/state.db; \
     if [ -r "$DB" ]; then \
       sqlite3 "$DB" "SELECT memory_id, datetime(last_dreamed_at, \"unixepoch\") AS last, dream_count, printf(\"%%.3f\", last_score) AS score FROM dream_promotions WHERE last_dreamed_at >= strftime(\"%%s\", \"now\", \"-7 days\") ORDER BY last_dreamed_at DESC LIMIT 50;" || true; \
       echo; \
@@ -47,14 +47,14 @@ ExecStart=/bin/bash -lc '\
     fi; \
   } > "$OUT" 2>&1; \
   echo "wrote $OUT"; \
-  ln -sfn "$(basename "$OUT")" /opt/sacred-brain/var/dreams/postcheck-latest.txt; \
+  ln -sfn "$(basename "$OUT")" /var/lib/agent-memory/dreams/postcheck-latest.txt; \
 '
 
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
-ReadWritePaths=/opt/sacred-brain/var
+ReadWritePaths=/var/lib/agent-memory
 
 [Install]
 WantedBy=multi-user.target

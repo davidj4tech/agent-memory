@@ -40,7 +40,7 @@ timers:
 # Full backup to /root/
 backup:
     sudo tar czf /root/sacred-brain-backup-$(date +%Y%m%d-%H%M).tar.gz \
-      /var/lib/sacred-brain/ /etc/sacred-brain/ \
+      /var/lib/agent-memory/ /etc/agent-memory/ \
       /etc/systemd/system/hippocampus*.service /etc/systemd/system/hippocampus*.timer \
       /etc/systemd/system/memory-governor*.service /etc/systemd/system/memory-governor*.timer \
       /etc/systemd/system/governor-digest.service /etc/systemd/system/governor-digest.timer
@@ -48,7 +48,7 @@ backup:
 
 # Quick SQLite DB backup
 backup-db:
-    sudo cp /var/lib/sacred-brain/hippocampus/hippocampus_memories.sqlite \
+    sudo cp /var/lib/agent-memory/hippocampus/hippocampus_memories.sqlite \
       /root/hippocampus_memories.sqlite.$(date +%Y%m%d-%H%M).bak
     @echo "DB backup complete"
 
@@ -76,10 +76,10 @@ config-check:
     #!/usr/bin/env bash
     set -euo pipefail
     ok=true
-    for f in /etc/sacred-brain/hippocampus.toml /etc/sacred-brain/hippocampus.env /etc/sacred-brain/memory-governor.env; do
+    for f in /etc/agent-memory/hippocampus.toml /etc/agent-memory/hippocampus.env /etc/agent-memory/memory-governor.env; do
       if [ -r "$f" ]; then echo "OK  $f"; else echo "FAIL $f"; ok=false; fi
     done
-    for f in /var/lib/sacred-brain/hippocampus/hippocampus_memories.sqlite /var/lib/sacred-brain/governor/state.db; do
+    for f in /var/lib/agent-memory/hippocampus/hippocampus_memories.sqlite /var/lib/agent-memory/governor/state.db; do
       if [ -f "$f" ]; then echo "OK  $f"; else echo "FAIL $f"; ok=false; fi
     done
     $ok && echo "All config checks passed" || { echo "Some checks failed"; exit 1; }
@@ -99,11 +99,11 @@ update-units:
 
 # Remove backward-compat symlinks from Phase 3 migration
 remove-compat-symlinks:
-    sudo rm -f /opt/sacred-brain/data/hippocampus_memories.sqlite
-    sudo rm -f /opt/sacred-brain/data/memories-denote
-    sudo rm -f /opt/sacred-brain/var/memory-governor/state.db
-    sudo rm -f /opt/sacred-brain/var/memory-governor/durable.spool
-    sudo rm -f /opt/sacred-brain/var/auto_memory_tuning.json
-    sudo rm -f /opt/sacred-brain/config/hippocampus.toml
+    sudo rm -f /var/lib/agent-memory/hippocampus/hippocampus_memories.sqlite
+    sudo rm -f /var/lib/agent-memory/hippocampus/memories-denote
+    sudo rm -f /var/lib/agent-memory/governor/state.db
+    sudo rm -f /var/lib/agent-memory/governor/durable.spool
+    sudo rm -f /var/lib/agent-memory/auto_memory_tuning.json
+    sudo rm -f /etc/agent-memory/hippocampus.toml
     sudo rm -f /etc/memory-governor/memory-governor.env
     @echo "Compat symlinks removed"

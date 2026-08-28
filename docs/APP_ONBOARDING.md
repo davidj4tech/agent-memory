@@ -58,7 +58,7 @@ EOF
 chmod 600 ~/.config/hippocampus.env
 ```
 
-For apps that run as a different OS user (e.g. `openclaw`, `sam`, `mel`), drop the file at *that* user's `~/.config/hippocampus.env` with ownership to match. The `sacred-brain` Governor service has its own env at `/etc/sacred-brain/hippocampus.env` — don't conflate.
+For apps that run as a different OS user (e.g. `openclaw`, `sam`, `mel`), drop the file at *that* user's `~/.config/hippocampus.env` with ownership to match. The `sacred-brain` Governor service has its own env at `/etc/agent-memory/hippocampus.env` — don't conflate.
 
 ### 2.3 Transferring the key between machines
 
@@ -81,10 +81,10 @@ The on-demand memory-search CLI. See `docs/AGENT_MEMORY_SEARCH.md` for the full 
 
 ```
 # Either symlink from the live tree (homer):
-ln -sf /opt/sacred-brain/scripts/sacred-search ~/.local/bin/sacred-search
+ln -sf /usr/local/bin/sacred-search ~/.local/bin/sacred-search
 
 # Or scp the script to a remote and mark executable:
-scp /opt/sacred-brain/scripts/sacred-search host:~/.local/bin/
+scp /usr/local/bin/sacred-search host:~/.local/bin/
 ssh host chmod +x ~/.local/bin/sacred-search
 ```
 
@@ -129,7 +129,7 @@ Defaults: `user_id=sam`, `limit=5`. Use `user_id=david` to search memories extra
 
 This hits Sacred Brain's Hippocampus store directly. Use it when a query is likely to reference something David has discussed before (past decisions, project context, ChatGPT conversations) rather than guessing from context alone.
 
-See `/opt/sacred-brain/docs/AGENT_MEMORY_SEARCH.md` for details.
+See `/usr/local/share/agent-memory/docs/AGENT_MEMORY_SEARCH.md` for details.
 ```
 
 For Claude Code, this auto-loads. For Codex and OpenCode, loading at user-scope is by convention — verify once per version by asking a fresh session "what is sacred-search?" outside any project.

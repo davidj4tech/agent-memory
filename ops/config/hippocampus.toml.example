@@ -22,7 +22,7 @@ enabled = true
 api_key = "CHANGE_ME_mem0_api_key"
 backend = "sqlite"
 backend_url = "http://localhost:8888"
-persistence_path = "/var/lib/sacred-brain/hippocampus/hippocampus_memories.sqlite"
+persistence_path = "/var/lib/agent-memory/hippocampus/hippocampus_memories.sqlite"
 summary_max_length = 480
 query_limit = 5
 
@@ -34,7 +34,7 @@ api_key = ""
 system_prompt = "You are the Sacred Brain hippocampus, managing memories concisely."
 
 [notes]
-notes_dir = "/var/lib/sacred-brain/hippocampus/memories-denote"
+notes_dir = "/var/lib/agent-memory/hippocampus/memories-denote"
 default_user = "default"
 
 [sam]
@@ -57,4 +57,4 @@ longitude = 0.0
 enabled = false
 engine = "swisseph"
 signals_enabled = true
-cache_path = "/var/lib/sacred-brain/cache/sam_chart.json"
+cache_path = "/var/lib/agent-memory/cache/sam_chart.json"

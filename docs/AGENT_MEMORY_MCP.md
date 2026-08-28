@@ -33,7 +33,7 @@ Exposes Sacred Brain as a Model Context Protocol server so any MCP-speaking agen
 The launcher `scripts/agent-memory-mcp-stdio` sources `~/.config/hippocampus.env`, activates the repo checkout, and execs the server. Symlink it into `~/.local/bin/`:
 
 ```
-ln -sf /opt/sacred-brain/scripts/agent-memory-mcp-stdio ~/.local/bin/agent-memory-mcp-stdio
+ln -sf /usr/local/bin/agent-memory-mcp-stdio ~/.local/bin/agent-memory-mcp-stdio
 ```
 
 Requires `mcp>=1.27.0` importable from the system Python (already in `pyproject.toml`).

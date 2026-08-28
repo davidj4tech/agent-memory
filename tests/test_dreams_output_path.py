@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from memory_governor.dream import (
-    SACRED_BRAIN_DREAMS_DEFAULT,
+    AGENT_MEMORY_DREAMS_DEFAULT,
     dreams_target_for_today,
     resolve_dreams_output_path,
     write_dream_entry,
@@ -19,10 +19,10 @@ def _clean_env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_default_no_env_no_package() -> None:
-    assert resolve_dreams_output_path() == SACRED_BRAIN_DREAMS_DEFAULT
+    assert resolve_dreams_output_path() == AGENT_MEMORY_DREAMS_DEFAULT
 
 
-def test_package_default_beats_sacred_default(tmp_path: Path) -> None:
+def test_package_default_beats_system_default(tmp_path: Path) -> None:
     pkg = tmp_path / "workspace" / "DREAMS.md"
     assert resolve_dreams_output_path(package_default=pkg) == pkg
 

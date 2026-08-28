@@ -21,7 +21,10 @@ import os
 import sqlite3
 from pathlib import Path
 
-DEFAULT_DB = Path(__file__).resolve().parents[1] / "data" / "hippocampus_memories.sqlite"
+# A deployed host has no source tree, so the default cannot be derived from
+# __file__. The units set HIPPOCAMPUS_SQLITE_PATH explicitly; this is the
+# system-layout fallback.
+DEFAULT_DB = Path("/var/lib/agent-memory/hippocampus/hippocampus_memories.sqlite")
 DB_PATH = Path(os.getenv("HIPPOCAMPUS_SQLITE_PATH", DEFAULT_DB))
 TUNE_PATH = Path(os.getenv("AUTO_TUNE_PATH", "var/auto_memory_tuning.json"))
 

@@ -5,17 +5,15 @@ Requires=memory-governor.service
 
 [Service]
 Type=oneshot
-User=sacred
-Group=sacred
-EnvironmentFile=/etc/sacred-brain/memory-governor.env
-WorkingDirectory=/opt/sacred-brain
-Environment=PYTHONPATH=/opt/sacred-brain
+User=agent-memory
+Group=agent-memory
+EnvironmentFile=/etc/agent-memory/memory-governor.env
 ExecStart=/bin/bash -lc '\
   USERS="${MG_DREAM_USERS:-sam}"; \
   IFS="," read -ra ITEMS <<< "$USERS"; \
   for u in "${ITEMS[@]}"; do \
     [ -z "$u" ] && continue; \
-    /opt/sacred-brain/.venv/bin/python /opt/sacred-brain/scripts/dream_sweep.py \
+    /usr/local/bin/agent-memory-dream \
       --user-id "$u" --apply --reflect || true; \
   done'
 
@@ -25,7 +23,7 @@ ProtectHome=true
 PrivateTmp=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
-ReadWritePaths=/opt/sacred-brain/var
+ReadWritePaths=/var/lib/agent-memory
 
 [Install]
 WantedBy=multi-user.target

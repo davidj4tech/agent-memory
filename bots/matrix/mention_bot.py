@@ -496,5 +496,10 @@ async def recall_memory(user_id: str, query: str) -> str:
             LOGGER.warning("recall_memory failed: %s", exc)
             return "Error recalling."
 
-if __name__ == "__main__":
+def run() -> None:
+    """Console-script entry point (`agent-memory-matrix-bot`)."""
     asyncio.run(main())
+
+
+if __name__ == "__main__":
+    run()

@@ -93,7 +93,7 @@ Two options:
   the Governor (`:54323`). Set `GOVERNOR_URL` explicitly.
 - **System prompt not getting the memory block.** `PI_BRIDGE_INJECT=0` may
   be in the env, or `session_start` may have failed (no cache). Check log.
-- **Extension not loading at all.** Run `pi --extension /opt/sacred-brain/extensions/pi-bridge.ts`
+- **Extension not loading at all.** Run `pi --extension /path/to/agent-memory/extensions/pi-bridge.ts`
   for a one-shot test; pi prints load errors on stderr. The auto-discovery
   path is `~/.pi/agent/extensions/*.ts`.
 

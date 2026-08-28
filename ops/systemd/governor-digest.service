@@ -4,21 +4,20 @@ After=memory-governor.service
 
 [Service]
 Type=oneshot
-User=sacred
-Group=sacred
-WorkingDirectory=/opt/sacred-brain
+User=agent-memory
+Group=agent-memory
 Environment=MG_USER_ID=sam
-Environment=DIGEST_OUTPUT_DIR=/opt/sam/memory/memory
+Environment=DIGEST_OUTPUT_DIR=/var/lib/agent-memory/digests
 Environment=MG_TZ_OFFSET_HOURS=11
-ExecStart=/opt/pipx/venvs/agent-memory/bin/python /opt/sacred-brain/scripts/governor_digest.py
+ExecStart=/usr/local/bin/agent-memory-digest
 
 # Hardening (lighter for oneshot)
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
-ReadWritePaths=/opt/sam/memory
-ReadOnlyPaths=/opt/sacred-brain /opt/pipx
+ReadWritePaths=/var/lib/agent-memory/digests
+ReadOnlyPaths=/opt/pipx
 ProtectKernelTunables=true
 ProtectKernelModules=true
 

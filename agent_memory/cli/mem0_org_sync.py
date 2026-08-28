@@ -17,10 +17,6 @@ import textwrap
 from pathlib import Path
 import sys
 
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
 from brain.hippocampus.config import HippocampusSettings, load_settings
 from brain.hippocampus.mem0_adapter import Mem0Adapter
 from brain.hippocampus.models import ExperienceCreate

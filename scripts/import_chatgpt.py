@@ -9,7 +9,7 @@ Strategy:
 This keeps the raw transcript on disk, and stores only distilled facts/preferences/decisions.
 
 Usage:
-  /opt/sacred-brain/.venv/bin/python scripts/import_chatgpt_to_hippocampus.py \
+  /opt/pipx/venvs/agent-memory/bin/python -m agent_memory.cli.import_chatgpt \
     --export /home/ryer/clawd/imports/chatgpt/export-20260128 \
     --user david \
     --limit 816 \

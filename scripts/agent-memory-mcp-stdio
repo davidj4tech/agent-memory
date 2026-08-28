@@ -20,9 +20,10 @@ done
 : "${SACRED_MCP_DEFAULT_WRITE_USER_ID:=coding_agent}"
 export SACRED_MCP_DEFAULT_WRITE_USER_ID
 
-# Prefer an in-tree checkout if present; fall back to importable install.
-REPO="${SACRED_BRAIN_ROOT:-/opt/sacred-brain}"
-if [[ -d "$REPO/services/agent_memory_mcp" ]]; then
+# Prefer an in-tree checkout if present; fall back to the installed package.
+# A deployed host has no checkout, so the fallback is the normal path.
+REPO="${AGENT_MEMORY_ROOT:-${SACRED_BRAIN_ROOT:-}}"
+if [[ -n "$REPO" && -d "$REPO/services/agent_memory_mcp" ]]; then
   cd "$REPO"
 fi
 

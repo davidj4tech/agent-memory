@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 from pathlib import Path
 
@@ -21,15 +22,16 @@ _DOC_NAME_RE = re.compile(r"^[A-Z0-9_\-]+$")
 
 
 def _docs_dir() -> Path:
-    # Canonical Sacred Brain docs directory
-    return Path("/opt/sacred-brain/docs")
+    # Docs are installed read-only data, not a source checkout: a deployed
+    # host has no repo. Overridable for user-mode installs and dev trees.
+    return Path(os.environ.get("AGENT_MEMORY_DOCS_DIR", "/usr/local/share/agent-memory/docs"))
 
 
 def _load_doc_text(doc_name: str, max_chars: int = 20000) -> str | None:
     """Allowlisted doc loader.
 
-    Only reads files under /opt/sacred-brain/docs and only by base name.
-    Example: MEMORY_GOVERNOR -> /opt/sacred-brain/docs/MEMORY_GOVERNOR.md
+    Only reads files under the docs directory and only by base name.
+    Example: MEMORY_GOVERNOR -> <docs dir>/MEMORY_GOVERNOR.md
     """
     name = (doc_name or "").strip().upper()
     if not _DOC_NAME_RE.match(name):

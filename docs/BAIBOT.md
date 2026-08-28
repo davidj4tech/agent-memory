@@ -36,13 +36,13 @@ sudo tee /etc/baibot/baibot.env >/dev/null <<'EOF'
 # (put the env values shown above here)
 EOF
 
-cd /opt/sacred-brain/ops/compose/baibot
+cd /etc/agent-memory/compose/baibot
 docker compose up -d
 ```
 
 Enable via systemd:
 ```bash
-sudo cp /opt/sacred-brain/ops/systemd/baibot-compose.service /etc/systemd/system/
+sudo cp /etc/systemd/system/baibot-compose.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now baibot-compose.service
 ```

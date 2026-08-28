@@ -62,6 +62,11 @@ async def main() -> None:
     await client.sync_forever(timeout=30000, full_state=True)
 
 
-if __name__ == "__main__":
+def run() -> None:
+    """Console-script entry point (`agent-memory-matrix-autojoin`)."""
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     asyncio.run(main())
+
+
+if __name__ == "__main__":
+    run()

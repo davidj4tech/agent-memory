@@ -68,9 +68,9 @@ State directory defaults to `var/memory-governor/` under the repo; override with
 
 ## Systemd
 `ops/systemd/memory-governor.service`
-- User: `memory-governor` (create and give access to `/opt/sacred-brain` + state dir)
+- User: `agent-memory` (nologin; needs access to the state dir only)
 - EnvironmentFile: `/etc/memory-governor/memory-governor.env`
-- ExecStart: `/opt/sacred-brain/.venv/bin/python -m memory_governor.app`
+- ExecStart: `/usr/local/bin/memory-governor`
 - After: `network-online.target litellm-compose.service hippocampus.service hippocampus-ingest.service`
 
 Enable:
@@ -133,7 +133,7 @@ curl -s -X POST http://127.0.0.1:54323/recall \
 | Symptom | Cause | Fix |
 |---------|-------|-----|
 | `/recall` returns empty `{"results":[]}` | Hippocampus (54321) is down | `sudo systemctl start hippocampus` |
-| `/observe` or `/remember` returns 500 | State DB not writable by `memory-governor` user | `sudo chown -R memory-governor:memory-governor /opt/sacred-brain/var/memory-governor/` |
+| `/observe` or `/remember` returns 500 | State DB not writable by `memory-governor` user | `sudo chown -R memory-governor:memory-governor /var/lib/agent-memory/governor/` |
 | `/remember` returns 200 but memory never appears in `/recall` | Worker not forwarding jobs to Hippocampus (check logs for write confirmation) | Check `journalctl -u memory-governor -f` for "Memory written to Hippocampus" after a `/remember` call |
 | Ingest returns 200 but Hippocampus never receives POST | Hippocampus (54321) down; ingest forwards silently fail | `sudo systemctl start hippocampus` |
 

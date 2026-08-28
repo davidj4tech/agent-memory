@@ -4,20 +4,19 @@ After=network.target
 
 [Service]
 Type=oneshot
-WorkingDirectory=/opt/sacred-brain
-User=sacred
-Group=sacred
-EnvironmentFile=/etc/sacred-brain/hippocampus.env
-Environment=HIPPOCAMPUS_SQLITE_PATH=/var/lib/sacred-brain/hippocampus/hippocampus_memories.sqlite
-ExecStart=/opt/pipx/venvs/agent-memory/bin/python scripts/prune_auto_memories.py
+User=agent-memory
+Group=agent-memory
+EnvironmentFile=/etc/agent-memory/hippocampus.env
+Environment=HIPPOCAMPUS_SQLITE_PATH=/var/lib/agent-memory/hippocampus/hippocampus_memories.sqlite
+ExecStart=/usr/local/bin/agent-memory-prune
 
 # Hardening (lighter for oneshot)
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
-ReadWritePaths=/var/lib/sacred-brain
-ReadOnlyPaths=/opt/sacred-brain /opt/pipx /etc/sacred-brain
+ReadWritePaths=/var/lib/agent-memory
+ReadOnlyPaths=/opt/pipx /etc/agent-memory
 ProtectKernelTunables=true
 ProtectKernelModules=true
 
