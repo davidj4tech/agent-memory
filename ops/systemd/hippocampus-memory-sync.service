@@ -24,6 +24,3 @@ ReadWritePaths=/var/lib/agent-memory
 ReadOnlyPaths=/opt/pipx /etc/agent-memory
 ProtectKernelTunables=true
 ProtectKernelModules=true
-
-[Install]
-WantedBy=multi-user.target

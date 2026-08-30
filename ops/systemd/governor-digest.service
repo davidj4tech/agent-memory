@@ -20,6 +20,3 @@ ReadWritePaths=/var/lib/agent-memory/digests
 ReadOnlyPaths=/opt/pipx
 ProtectKernelTunables=true
 ProtectKernelModules=true
-
-[Install]
-WantedBy=multi-user.target

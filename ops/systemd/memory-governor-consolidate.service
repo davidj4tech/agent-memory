@@ -29,6 +29,3 @@ ProtectHome=true
 PrivateTmp=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
-
-[Install]
-WantedBy=multi-user.target

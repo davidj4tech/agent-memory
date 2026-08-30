@@ -43,10 +43,12 @@ REPO_DIR := $(shell pwd)
 # units that fail on every boot of a host that never wanted them.
 #   matrix-*   need the `matrix` extra (matrix-nio) and /etc/agent-memory/matrix.env
 #   *-compose  need docker and a per-host compose stack
-#   memory-sync needs MEMORY_SYNC_ROOT pointed at a real directory
+#   memory-sync.timer needs MEMORY_SYNC_ROOT pointed at a real directory
+# Timer-activated services are static (no [Install]) and are never enabled
+# directly, so only their timers appear here.
 OPTIONAL_UNITS ?= matrix-bot.service matrix-autojoin.service \
                   baibot-compose.service litellm-compose.service llamacpp-compose.service \
-                  hippocampus-memory-sync.service hippocampus-memory-sync.timer
+                  hippocampus-memory-sync.timer
 
 .PHONY: install install-update install-deps check-legacy install-package \
         install-bin install-systemd install-config install-compose install-docs \

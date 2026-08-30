@@ -105,6 +105,28 @@ The Makefile honors standard variables for non-default installs and packagers:
 | `DESTDIR` | (empty) | Stage all paths under this prefix (skips `systemctl` calls) |
 | `PIPX_HOME` | `/opt/pipx` | Where pipx puts the package's venv |
 
+## Timers, not services
+
+A timer-activated oneshot has **no `[Install]` section**. Only its `.timer` is
+enabled; the service is `static` and exists to be triggered.
+
+This matters because `[Install] WantedBy=multi-user.target` on such a service
+means it runs **at boot as well as on its schedule** — so every one of these
+fired twice on the first boot after an install. They are static now, and
+`systemctl enable` on one is refused outright ("no installation config"), so
+the mistake cannot be made by hand either. Enable the timer instead:
+
+```bash
+sudo systemctl enable --now hippocampus-notes-export.timer
+```
+
+Nothing depended on the boot run: every timer sets `Persistent=true`, so a
+missed occurrence is caught up after boot anyway, and `hippocampus-auto-tune`
+additionally uses `OnBootSec=5min`.
+
+That leaves `make install` enabling ten units — `hippocampus.service`,
+`memory-governor.service`, and eight timers.
+
 ## Units that are installed but not enabled
 
 `make install` enables every unit with an `[Install]` section, apart from the
@@ -117,7 +139,7 @@ ones listed in `OPTIONAL_UNITS`:
 | `baibot-compose.service` | Needs docker and a configured compose stack | `ConditionFileIsExecutable=/usr/bin/docker` + `ConditionPathExists` on the stack's `docker-compose.yml` |
 | `litellm-compose.service` | Same | Same |
 | `llamacpp-compose.service` | Same | Same |
-| `hippocampus-memory-sync.service` (+ `.timer`) | Needs `MEMORY_SYNC_ROOT` pointed at a real directory | `ExecCondition` |
+| `hippocampus-memory-sync.timer` | Needs `MEMORY_SYNC_ROOT` pointed at a real directory | `ExecCondition` on the service |
 
 None of these is something `make install` can supply: an extra outside the
 default dependency set, a homeserver token, a container runtime, or a path that

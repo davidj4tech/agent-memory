@@ -55,6 +55,3 @@ ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
 ReadWritePaths=/var/lib/agent-memory
-
-[Install]
-WantedBy=multi-user.target
