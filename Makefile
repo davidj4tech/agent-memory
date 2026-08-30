@@ -41,8 +41,12 @@ REPO_DIR := $(shell pwd)
 # something `make install` cannot provide: an optional dependency, a
 # credential, or a per-host config file. Enabling them by default produced
 # units that fail on every boot of a host that never wanted them.
-#   matrix-*  need the `matrix` extra (matrix-nio) and /etc/agent-memory/matrix.env
-OPTIONAL_UNITS ?= matrix-bot.service matrix-autojoin.service
+#   matrix-*   need the `matrix` extra (matrix-nio) and /etc/agent-memory/matrix.env
+#   *-compose  need docker and a per-host compose stack
+#   memory-sync needs MEMORY_SYNC_ROOT pointed at a real directory
+OPTIONAL_UNITS ?= matrix-bot.service matrix-autojoin.service \
+                  baibot-compose.service litellm-compose.service llamacpp-compose.service \
+                  hippocampus-memory-sync.service hippocampus-memory-sync.timer
 
 .PHONY: install install-update install-deps check-legacy install-package \
         install-bin install-systemd install-config install-compose install-docs \
@@ -134,10 +138,11 @@ install-systemd:
 	    if [ -n "$$skipped" ]; then \
 	        echo "  [i] Installed but NOT enabled (opt-in):"; \
 	        for u in $$skipped; do echo "        $$u"; done; \
-	        echo "      They need setup make install cannot do. For the Matrix bots:"; \
-	        echo "        pipx install --force '\''$(REPO_DIR)[matrix]'\''"; \
-	        echo "        \$$EDITOR $(SYSCONFDIR)/$(APP_NAME)/matrix.env"; \
-	        echo "        sudo systemctl enable --now <unit>"; \
+	        echo "      They need setup make install cannot do — see docs/INSTALL.md."; \
+	        echo "      Matrix:      pipx install --force '\''$(REPO_DIR)[matrix]'\''  + $(SYSCONFDIR)/$(APP_NAME)/matrix.env"; \
+	        echo "      *-compose:   docker, and edit $(SYSCONFDIR)/$(APP_NAME)/compose/<stack>/"; \
+	        echo "      memory-sync: set MEMORY_SYNC_ROOT in $(SYSCONFDIR)/$(APP_NAME)/hippocampus.env"; \
+	        echo "      Then:        sudo systemctl enable --now <unit>"; \
 	    fi; \
 	fi
 

@@ -3,6 +3,11 @@ Description=llama.cpp server (docker compose)
 Requires=docker.service
 After=docker.service network-online.target
 
+# Skip cleanly (not fail) on a host without docker, or with this stack
+# removed from /etc/agent-memory/compose.
+ConditionFileIsExecutable=/usr/bin/docker
+ConditionPathExists=/etc/agent-memory/compose/llamacpp/docker-compose.yml
+
 [Service]
 Type=oneshot
 RemainAfterExit=yes

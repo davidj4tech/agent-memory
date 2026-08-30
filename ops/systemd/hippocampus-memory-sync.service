@@ -10,6 +10,9 @@ EnvironmentFile=/etc/agent-memory/hippocampus.env
 # MEMORY_SYNC_ROOT is host-specific: set it in hippocampus.env.
 Environment=HIPPOCAMPUS_USER_ID=sam
 Environment=HIPPOCAMPUS_SQLITE_PATH=/var/lib/agent-memory/hippocampus/hippocampus_memories.sqlite
+# Skip cleanly until the host sets MEMORY_SYNC_ROOT to a real directory.
+# Condition* cannot see EnvironmentFile values; ExecCondition can.
+ExecCondition=/bin/sh -c '[ -n "$MEMORY_SYNC_ROOT" ] && [ -d "$MEMORY_SYNC_ROOT" ]'
 ExecStart=/usr/local/bin/agent-memory-file-sync push
 
 # Hardening

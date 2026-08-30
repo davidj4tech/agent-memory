@@ -110,27 +110,47 @@ The Makefile honors standard variables for non-default installs and packagers:
 `make install` enables every unit with an `[Install]` section, apart from the
 ones listed in `OPTIONAL_UNITS`:
 
-| Unit | Why it is opt-in |
-| --- | --- |
-| `matrix-bot.service` | Needs the `matrix` extra (`matrix-nio`) and `/etc/agent-memory/matrix.env` |
-| `matrix-autojoin.service` | Same |
+| Unit | Why it is opt-in | Guard if enabled early |
+| --- | --- | --- |
+| `matrix-bot.service` | Needs the `matrix` extra (`matrix-nio`) and `/etc/agent-memory/matrix.env` | `ConditionPathExists` on `matrix.env` |
+| `matrix-autojoin.service` | Same | Same |
+| `baibot-compose.service` | Needs docker and a configured compose stack | `ConditionFileIsExecutable=/usr/bin/docker` + `ConditionPathExists` on the stack's `docker-compose.yml` |
+| `litellm-compose.service` | Same | Same |
+| `llamacpp-compose.service` | Same | Same |
+| `hippocampus-memory-sync.service` (+ `.timer`) | Needs `MEMORY_SYNC_ROOT` pointed at a real directory | `ExecCondition` |
 
-Neither dependency is something `make install` can supply: the extra is not in
-the default dependency set, and the env file holds a homeserver token. Enabling
-them by default gave every host a pair of units that failed on each boot,
-whether or not that host had any interest in Matrix.
+None of these is something `make install` can supply: an extra outside the
+default dependency set, a homeserver token, a container runtime, or a path that
+only the host knows. Enabling them by default gave every host a handful of
+units that failed on each boot, whether or not it wanted them.
 
 To turn them on:
 
 ```bash
+# Matrix
 pipx install --force '/path/to/agent-memory[matrix]'
 sudo $EDITOR /etc/agent-memory/matrix.env
 sudo systemctl enable --now matrix-bot.service
+
+# compose stacks — edit the stack first
+sudo $EDITOR /etc/agent-memory/compose/litellm/docker-compose.yml
+sudo systemctl enable --now litellm-compose.service
+
+# markdown memory sync — set MEMORY_SYNC_ROOT
+sudo $EDITOR /etc/agent-memory/hippocampus.env
+sudo systemctl enable --now hippocampus-memory-sync.timer
 ```
 
-Both units also carry `ConditionPathExists=/etc/agent-memory/matrix.env`, so if
-one is enabled before the config exists it is **skipped** rather than failed —
-`ConditionResult=no`, `Result=success`, and no `Restart=on-failure` loop.
+### Enabled early is safe
+
+Each unit also carries a guard, so one enabled before its prerequisites exist
+is **skipped** rather than failed — `Result=success`, and no
+`Restart=on-failure` loop chewing on a unit that cannot succeed.
+
+`MEMORY_SYNC_ROOT` needs `ExecCondition` rather than a `Condition*`: the
+`Condition*` family is evaluated against the manager environment and cannot see
+values from an `EnvironmentFile`, whereas `ExecCondition` runs with the unit's
+environment loaded and skips the unit on a non-zero exit.
 
 Override the list if you want different defaults:
 
