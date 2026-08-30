@@ -5,6 +5,21 @@ Legacy mention/DM bot. It now supports:
 - Optional TTS on replies (LiteLLM `/v1/audio/speech`).
 - Optional STT for received voice notes (LiteLLM `/v1/audio/transcriptions`).
 
+## Install
+
+`matrix-nio` is an optional extra, so a default install does not pull it in and
+`make install` does **not** enable the Matrix units. Install the extra, write
+the config, then enable:
+
+```bash
+pipx install --force '/path/to/agent-memory[matrix]'
+sudo $EDITOR /etc/agent-memory/matrix.env
+sudo systemctl enable --now matrix-bot.service matrix-autojoin.service
+```
+
+If a unit is enabled before `matrix.env` exists it is skipped rather than
+failed (`ConditionPathExists`), so it will not sit in a restart loop.
+
 ## Configuration
 Create `/etc/agent-memory/matrix.env` (or export env vars). Key vars:
 ```

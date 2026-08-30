@@ -37,6 +37,13 @@ PIPX_BIN_DIR ?= $(PREFIX)/bin
 
 REPO_DIR := $(shell pwd)
 
+# Units that are installed but NOT enabled automatically, because they need
+# something `make install` cannot provide: an optional dependency, a
+# credential, or a per-host config file. Enabling them by default produced
+# units that fail on every boot of a host that never wanted them.
+#   matrix-*  need the `matrix` extra (matrix-nio) and /etc/agent-memory/matrix.env
+OPTIONAL_UNITS ?= matrix-bot.service matrix-autojoin.service
+
 .PHONY: install install-update install-deps check-legacy install-package \
         install-bin install-systemd install-config install-compose install-docs \
         uninstall uninstall-purge help
@@ -114,12 +121,24 @@ install-systemd:
 	done
 	@if [ -z "$(DESTDIR)" ]; then \
 	    systemctl daemon-reload; \
+	    skipped=""; \
 	    for f in ops/systemd/*.service ops/systemd/*.timer; do \
 	        [ -e "$$f" ] || continue; \
-	        if grep -q '^\[Install\]' "$$f"; then \
-	            systemctl enable "$$(basename $$f)"; \
-	        fi; \
+	        unit=$$(basename "$$f"); \
+	        grep -q '^\[Install\]' "$$f" || continue; \
+	        case " $(OPTIONAL_UNITS) " in \
+	            *" $$unit "*) skipped="$$skipped $$unit"; continue;; \
+	        esac; \
+	        systemctl enable "$$unit"; \
 	    done; \
+	    if [ -n "$$skipped" ]; then \
+	        echo "  [i] Installed but NOT enabled (opt-in):"; \
+	        for u in $$skipped; do echo "        $$u"; done; \
+	        echo "      They need setup make install cannot do. For the Matrix bots:"; \
+	        echo "        pipx install --force '\''$(REPO_DIR)[matrix]'\''"; \
+	        echo "        \$$EDITOR $(SYSCONFDIR)/$(APP_NAME)/matrix.env"; \
+	        echo "        sudo systemctl enable --now <unit>"; \
+	    fi; \
 	fi
 
 # ── Phase: config templates ─────────────────────────────────────────

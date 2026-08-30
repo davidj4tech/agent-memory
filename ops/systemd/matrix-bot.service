@@ -2,6 +2,9 @@
 Description=agent-memory Matrix Mention Bot
 After=network.target
 
+# Skip cleanly (not fail) when the host has not configured Matrix.
+ConditionPathExists=/etc/agent-memory/matrix.env
+
 [Service]
 Type=simple
 EnvironmentFile=/etc/agent-memory/matrix.env

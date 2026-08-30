@@ -58,7 +58,7 @@ package now (`agent_memory.cli.*`), so that whole class of drift is gone.
 | `install-bin` | Installs `agent-memory-search` (and the `sacred-search` alias) to `$(PREFIX)/bin/` |
 | `install-compose` | Copies the compose stacks to `/etc/agent-memory/compose/<stack>/`, skipping any file already there |
 | `install-docs` | Installs `docs/*.md` to `$(PREFIX)/share/agent-memory/docs/` (the bot doc loader reads these) |
-| `install-systemd` | Copies all unit files from `ops/systemd/` to `/etc/systemd/system/`, runs `daemon-reload`, enables every unit with an `[Install]` section |
+| `install-systemd` | Copies all unit files from `ops/systemd/` to `/etc/systemd/system/`, runs `daemon-reload`, enables every unit with an `[Install]` section **except those in `OPTIONAL_UNITS`** (see below) |
 | `install-config` | Copies `.example` templates to `/etc/agent-memory/` (skips files that already exist) |
 
 `make install` does **not** start services automatically — the operator
@@ -104,6 +104,39 @@ The Makefile honors standard variables for non-default installs and packagers:
 | `SYSCONFDIR` | `/etc` | Parent of `sacred-brain/` config dir |
 | `DESTDIR` | (empty) | Stage all paths under this prefix (skips `systemctl` calls) |
 | `PIPX_HOME` | `/opt/pipx` | Where pipx puts the package's venv |
+
+## Units that are installed but not enabled
+
+`make install` enables every unit with an `[Install]` section, apart from the
+ones listed in `OPTIONAL_UNITS`:
+
+| Unit | Why it is opt-in |
+| --- | --- |
+| `matrix-bot.service` | Needs the `matrix` extra (`matrix-nio`) and `/etc/agent-memory/matrix.env` |
+| `matrix-autojoin.service` | Same |
+
+Neither dependency is something `make install` can supply: the extra is not in
+the default dependency set, and the env file holds a homeserver token. Enabling
+them by default gave every host a pair of units that failed on each boot,
+whether or not that host had any interest in Matrix.
+
+To turn them on:
+
+```bash
+pipx install --force '/path/to/agent-memory[matrix]'
+sudo $EDITOR /etc/agent-memory/matrix.env
+sudo systemctl enable --now matrix-bot.service
+```
+
+Both units also carry `ConditionPathExists=/etc/agent-memory/matrix.env`, so if
+one is enabled before the config exists it is **skipped** rather than failed —
+`ConditionResult=no`, `Result=success`, and no `Restart=on-failure` loop.
+
+Override the list if you want different defaults:
+
+```bash
+sudo make install OPTIONAL_UNITS="matrix-bot.service litellm-compose.service"
+```
 
 ## Directory Layout
 
