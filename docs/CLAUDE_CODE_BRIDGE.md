@@ -28,7 +28,7 @@ Scopes are hierarchical because `GOVERNOR_USER_ID` varies across machines (see `
 
 ```
 scripts/sync_claude_memory.py --dry-run           # preview
-scripts/sync_claude_memory.py                      # sync (ledger at ~/.cache/agent-memory/claude-sync-ledger.json)
+scripts/sync_claude_memory.py                      # sync (ledger at ~/.local/state/agent-memory/claude-sync-ledger.json)
 scripts/sync_claude_memory.py --force              # re-send everything
 scripts/sync_claude_memory.py --watch              # live mirror (requires inotifywait)
 ```
@@ -57,7 +57,7 @@ Remove the two entries from `~/.claude/settings.json` under `hooks.SessionStart`
 
 - **CONTEXT_MEMORY.md is empty.** Check `GOVERNOR_URL` reachable (`curl $GOVERNOR_URL/health`) and that memories exist under your scope (`curl $GOVERNOR_URL/scopes`).
 - **PreCompact not firing.** Settings JSON invalid, or Claude Code version too old. The installer refuses to edit invalid JSON. Validate with `jq . ~/.claude/settings.json`.
-- **Sync script skipping files.** Delete the ledger at `~/.cache/agent-memory/claude-sync-ledger.json` and rerun, or use `--force`.
+- **Sync script skipping files.** Delete the ledger at `~/.local/state/agent-memory/claude-sync-ledger.json` and rerun, or use `--force`.
 
 ## Related
 
