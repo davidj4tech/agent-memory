@@ -1,34 +1,44 @@
 #!/usr/bin/env bash
-# agent-memory-search — search Hippocampus memories by query string.
+# agent-memory-search — search Hippocampus (agent-memory / Sacred Brain) memories.
 #
 # Usage:
 #   agent-memory-search <query> [user_id] [limit]
-#   sacred-search <query> [user_id] [limit]  # legacy alias
+#   sacred-search <query> [user_id] [limit]        # legacy alias, same script
 #
-# Defaults: user_id=sam, limit=5. Set user_id=david to search memories
-# extracted from ChatGPT conversation imports.
+# Defaults: user_id=ryer,sam — the live namespace plus the frozen pre-rename
+# one, searched together and merged by score. Everything written since mid-July
+# 2026 lands under `ryer`; `sam` (same assistant identity, named `mel` before
+# the host rename) holds everything before that. Pass a single id to narrow,
+# e.g. `ryer`, or `david` for memories extracted from the ChatGPT archive
+# (a separate namespace by design, never searched by default).
 #
-# Env (loaded from ~/.config/hippocampus.env or ~/.config/agent-memory.env):
-#   AGENT_MEMORY_HIPPOCAMPUS_URL or HIPPOCAMPUS_URL      default http://127.0.0.1:54321
-#   AGENT_MEMORY_API_KEY or HIPPOCAMPUS_API_KEY          required if auth is enabled
+# user_id accepts a comma-separated list; each is queried and the merged hits
+# are sorted by score, then truncated to [limit].
 #
-# Hits Hippocampus directly (port 54321), not the Governor's /recall. This
-# means ChatGPT-archive memories are returned — the Governor's archive
-# suppression doesn't apply here.
-
+# Env (loaded from ~/.config/hippocampus.env or ~/.config/sacred-brain.env):
+#   AGENT_MEMORY_HIPPOCAMPUS_URL or HIPPOCAMPUS_URL   default http://127.0.0.1:54321
+#   AGENT_MEMORY_API_KEY or HIPPOCAMPUS_API_KEY       required if auth is enabled
+#   AGENT_MEMORY_SEARCH_USERS                         overrides the default id list
+#
+# Hits Hippocampus directly (:54321), NOT the Governor's /recall — so
+# ChatGPT-archive memories are returned; the Governor's archive suppression
+# does not apply here.
+#
+# This is the single implementation, and it lives in agent-config because every
+# host needs it (the store is reached over the tailnet at red5:54321), whereas
+# the agent-memory repo is only cloned on the hub.
 set -euo pipefail
 
 if [[ $# -lt 1 ]]; then
-  sed -n '3,8p' "$0" >&2
+  sed -n '4,14p' "$0" >&2
   exit 2
 fi
 
 QUERY="$1"
-USER_ID="${2:-sam}"
+USER_ID="${2:-${AGENT_MEMORY_SEARCH_USERS:-ryer,sam}}"
 LIMIT="${3:-5}"
 
-# Load env (first hit wins)
-for f in "$HOME/.config/hippocampus.env" "$HOME/.config/agent-memory.env"; do
+for f in "$HOME/.config/hippocampus.env" "$HOME/.config/sacred-brain.env"; do
   if [[ -r "$f" ]]; then
     set -a; . "$f"; set +a
     break
@@ -43,24 +53,65 @@ ENCODED_QUERY="$(QUERY="$QUERY" python3 -c 'import os, urllib.parse; print(urlli
 HDRS=()
 [[ -n "$API_KEY" ]] && HDRS+=(-H "X-API-Key: $API_KEY")
 
-curl -sS --max-time 10 "${HDRS[@]}" \
-  "${BASE_URL}/memories/${USER_ID}?query=${ENCODED_QUERY}&limit=${LIMIT}" \
-  | python3 -c '
-import json, sys
-try:
-    data = json.load(sys.stdin)
-except Exception as e:
-    print(f"agent-memory-search/sacred-search: failed to parse response: {e}", file=sys.stderr)
-    sys.exit(1)
-if "memories" not in data:
-    # Could be an error body
-    print(json.dumps(data, indent=2))
-    sys.exit(1)
-memories = data["memories"]
-if not memories:
+# Fetch each namespace into one stream of JSON documents, one per line.
+BODIES=""
+IFS=',' read -ra IDS <<< "$USER_ID"
+for uid in "${IDS[@]}"; do
+  uid="${uid// /}"
+  [[ -z "$uid" ]] && continue
+  body="$(curl -sS --max-time 10 "${HDRS[@]}" \
+    "${BASE_URL}/memories/${uid}?query=${ENCODED_QUERY}&limit=${LIMIT}")"
+  BODIES+="${uid}"$'\t'"${body}"$'\n'
+done
+
+LIMIT="$LIMIT" printf '%s' "$BODIES" | python3 -c '
+import json, os, sys
+
+limit = int(os.environ.get("LIMIT", "5"))
+merged = []
+for line in sys.stdin:
+    line = line.rstrip("\n")
+    if not line.strip():
+        continue
+    uid, _, raw = line.partition("\t")
+    try:
+        data = json.loads(raw)
+    except Exception as e:
+        print(f"agent-memory-search: failed to parse response for {uid}: {e}", file=sys.stderr)
+        sys.exit(1)
+    if "memories" not in data:
+        # Could be an error body
+        print(json.dumps(data, indent=2))
+        sys.exit(1)
+    for m in data["memories"]:
+        m["_user_id"] = uid
+        merged.append(m)
+
+# Hippocampus returns score=1.00 for essentially every hit, so a plain
+# score sort would let the first namespace crowd the others out entirely.
+# Interleave round-robin first, then stable-sort by score: real score
+# differences still win, ties alternate between namespaces.
+by_user = {}
+for m in merged:
+    by_user.setdefault(m["_user_id"], []).append(m)
+
+interleaved = []
+while any(by_user.values()):
+    for uid in list(by_user):
+        if by_user[uid]:
+            interleaved.append(by_user[uid].pop(0))
+
+def sort_key(m):
+    s = m.get("score")
+    return s if isinstance(s, (int, float)) else float("-inf")
+
+interleaved.sort(key=sort_key, reverse=True)
+merged = interleaved[:limit]
+
+if not merged:
     print("No memories found.")
     sys.exit(0)
-for i, m in enumerate(memories, 1):
+for i, m in enumerate(merged, 1):
     meta = m.get("metadata") or {}
     src = meta.get("source", "?")
     kind = meta.get("kind", "?")
@@ -69,7 +120,8 @@ for i, m in enumerate(memories, 1):
     score = m.get("score")
     score_str = f" score={score:.2f}" if isinstance(score, (int, float)) else ""
     text = m.get("text", "")
-    print(f"[{i}] ({kind}, conf={conf}, src={src}{score_str}) " + text)
+    uid = m.get("_user_id", "?")
+    print(f"[{i}] ({kind}, conf={conf}, src={src}, user={uid}{score_str}) " + text)
     if title:
         print(f"    from: {title}")
     print()

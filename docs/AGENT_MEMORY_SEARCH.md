@@ -9,13 +9,19 @@ agent-memory-search <query> [user_id] [limit]
 sacred-search <query> [user_id] [limit]  # legacy alias
 ```
 
-Defaults: `user_id=sam`, `limit=5`.
+Defaults: `user_id=ryer,sam`, `limit=5`.
+
+`user_id` accepts a comma-separated list. The default searches both assistant
+namespaces and interleaves the hits round-robin before truncating to `limit`
+(Hippocampus scores nearly every hit at 1.00, so without the interleave the
+first namespace would crowd the others out). `AGENT_MEMORY_SEARCH_USERS`
+overrides the default list.
 
 ## Examples
 
 ```
 agent-memory-search "raspberry pi setup"
-agent-memory-search "matrix bridge config" sam 10
+agent-memory-search "matrix bridge config" ryer 10   # live namespace only
 agent-memory-search "xmpp bot" david     # ChatGPT-extracted memories (user:david)
 ```
 
@@ -38,7 +44,8 @@ Loaded from `~/.config/hippocampus.env` or `~/.config/agent-memory.env`:
 
 | `user_id` | What's there |
 |-----------|--------------|
-| `sam` | Sam persona memories, incl. raw ChatGPT conversation exports (cron-imported by `chatgpt_export_to_hippocampus.py` at src=`chatgpt_export`) |
+| `ryer` | **The live namespace.** Everything written since mid-July 2026, when `GOVERNOR_USER_ID`/`SACRED_MCP_DEFAULT_USER_ID` were set to `ryer` in `~/.config/hippocampus.env`. Source `claude-code:sync`. |
+| `sam` | The same assistant identity before the host rename; frozen since 2026-07-14. Sam persona memories, incl. raw ChatGPT conversation exports (cron-imported by `chatgpt_export_to_hippocampus.py` at src=`chatgpt_export`) |
 | `david` | Memories extracted from ChatGPT history by `scripts/import_chatgpt.py` — typed (`preference`, `project`, `decision`, `fact`, `todo`, etc.) with confidences |
 | `mel` | Mel persona |
 
