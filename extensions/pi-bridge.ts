@@ -141,8 +141,8 @@ function formatMemoryBlock(scopePath: string, results: RecallResult[]): string {
 	lines.push("# Relevant memory");
 	lines.push("");
 	lines.push(
-		"> Search long-term memory on demand: `sacred-search <query> [user_id] [limit]` " +
-		"(defaults: `user_id=sam`, `limit=5`). See `docs/AGENT_MEMORY_SEARCH.md` in the agent-memory repo.",
+		"> Search long-term memory on demand: `agent-memory-search <query> [user_id] [limit]` " +
+		"(defaults: `user_id=ryer,sam`, `limit=5`; legacy alias `sacred-search`). See `docs/AGENT_MEMORY_SEARCH.md` in the agent-memory repo.",
 	);
 	lines.push("");
 	if (!results.length) {

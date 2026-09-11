@@ -53,14 +53,11 @@ If you're looking for "that thing I discussed with ChatGPT", try both `sam` (raw
 
 ## Install
 
-Already installed on homer as `agent-memory-search` and `sacred-search`. For other machines:
-
-```
-ln -sf /usr/local/bin/agent-memory-search ~/.local/bin/agent-memory-search
-ln -sf /usr/local/bin/sacred-search ~/.local/bin/sacred-search
-```
-
-…or include `/usr/local/bin/` in your `$PATH`.
+The single implementation is `bin/agent-memory-search` in the **agent-config**
+repo (this repo no longer ships a copy). `agent-config/install.sh --core`
+links it as both `~/.local/bin/agent-memory-search` and
+`~/.local/bin/sacred-search` on every host; it reaches the store at
+`red5:54321` over the tailnet, so it works wherever agent-config is installed.
 
 ## How agents discover it
 

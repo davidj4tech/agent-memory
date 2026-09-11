@@ -34,15 +34,11 @@ cd ~/projects/agent-memory
 #    (creates ~/.local/bin/hippocampus and ~/.local/bin/memory-governor)
 pipx install --force .
 
-# 3. Put the shell utilities on PATH
-install -m 0755 scripts/sacred-search          ~/.local/bin/sacred-search
-install -m 0755 scripts/agent-memory-search    ~/.local/bin/agent-memory-search
-install -m 0755 scripts/agent-memory-healthcheck ~/.local/bin/agent-memory-healthcheck
-
-# 4. Install the user systemd units
-install -d ~/.config/systemd/user
-install -m 0644 ops/systemd/user/*.service ops/systemd/user/*.timer ~/.config/systemd/user/
-systemctl --user daemon-reload
+# 3+4. Link the healthcheck onto PATH and SYMLINK the user systemd units
+#      (never copies — the repo stays the source of truth for what runs).
+#      `agent-memory-search` / `sacred-search` come from agent-config, which
+#      is installed on every host; nothing to do here for them.
+scripts/install-user.sh --units
 
 # 5. Create config (see below), then enable + start
 systemctl --user enable --now hippocampus.service memory-governor.service
@@ -65,9 +61,8 @@ systemctl --user list-timers --no-pager
 ~/.local/share/pipx/venvs/agent-memory/ ← installed Python package (services run from here)
 ~/.local/bin/hippocampus
 ~/.local/bin/memory-governor
-~/.local/bin/sacred-search
-~/.local/bin/agent-memory-search
-~/.local/bin/agent-memory-healthcheck
+~/.local/bin/agent-memory-healthcheck               → symlink into the clone
+~/.local/bin/agent-memory-search                    → symlink into ~/agent-config/bin (not this repo)
 ~/.config/agent-memory/                             ← configuration (not in repo)
     hippocampus.env
     memory-governor.env
@@ -76,7 +71,7 @@ systemctl --user list-timers --no-pager
     hippocampus/
     governor/
     dreams/
-~/.config/systemd/user/                             ← user units (from ops/systemd/user/)
+~/.config/systemd/user/                             ← SYMLINKS to ops/systemd/user/
 ```
 
 ## User units
@@ -86,6 +81,13 @@ home directory and expect the clone at `%h/projects/agent-memory`. They are
 kept in a `user/` subdirectory so the system `Makefile`'s non-recursive
 `ops/systemd/*.service` glob never mis-installs them into
 `/etc/systemd/system`, where the `--user`/`%h` assumptions would break.
+
+`scripts/install-user.sh` **symlinks** them into `~/.config/systemd/user/`
+(via agent-config's `link_systemd_units_repoint_only`, or an equivalent
+fallback). Earlier installs copied them, and the live `hippocampus.service`
+drifted from the repo as a result — edit the repo file and `daemon-reload`,
+never the file under `~/.config`. Existing `.wants/` links are re-pointed;
+nothing is auto-enabled.
 
 | Unit | Type | Purpose |
 | --- | --- | --- |
@@ -101,10 +103,7 @@ kept in a `user/` subdirectory so the system `Makefile`'s non-recursive
 ```bash
 cd ~/projects/agent-memory
 git pull
-pipx install --force .
-install -m 0755 scripts/sacred-search scripts/agent-memory-search scripts/agent-memory-healthcheck ~/.local/bin/
-install -m 0644 ops/systemd/user/*.service ops/systemd/user/*.timer ~/.config/systemd/user/
-systemctl --user daemon-reload
+scripts/install-user.sh          # pipx install + re-link units + daemon-reload
 systemctl --user restart hippocampus.service memory-governor.service
 ```
 
@@ -118,11 +117,8 @@ state (which live outside the clone):
 systemctl --user stop hippocampus.service memory-governor.service
 git -C ~/projects/sacred-brain pull                 # land latest first
 mv ~/projects/sacred-brain ~/projects/agent-memory
-# Refresh units so WorkingDirectory/PYTHONPATH/ExecStart point at the new path
-install -m 0644 ~/projects/agent-memory/ops/systemd/user/*.service \
-                ~/projects/agent-memory/ops/systemd/user/*.timer \
-                ~/.config/systemd/user/
-systemctl --user daemon-reload
+# Re-link units so they point into the new clone location
+~/projects/agent-memory/scripts/install-user.sh --units
 systemctl --user start hippocampus.service memory-governor.service
 ```
 

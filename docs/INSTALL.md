@@ -55,7 +55,7 @@ package now (`agent_memory.cli.*`), so that whole class of drift is gone.
 | `install-deps` | Creates the `agent-memory` system user (nologin) and `/var/lib/agent-memory/{hippocampus,governor,cache,dreams,digests}` and `/etc/agent-memory/` |
 | `check-legacy` | Reports any leftover `/opt/sacred-brain`, `/etc/sacred-brain`, `/var/lib/sacred-brain` or `sacred` user. Advisory only — it never deletes, because those can hold an edited config or a live store |
 | `install-package` | `pipx install --force .` into `/opt/pipx/venvs/agent-memory/`, exposing every console script in `$(PREFIX)/bin/` |
-| `install-bin` | Installs `agent-memory-search` (and the `sacred-search` alias) to `$(PREFIX)/bin/` |
+| `install-bin` | No-op since 2026-09: `agent-memory-search` (and the `sacred-search` alias) come from agent-config's `bin/`, installed fleet-wide |
 | `install-compose` | Copies the compose stacks to `/etc/agent-memory/compose/<stack>/`, skipping any file already there |
 | `install-docs` | Installs `docs/*.md` to `$(PREFIX)/share/agent-memory/docs/` (the bot doc loader reads these) |
 | `install-systemd` | Copies all unit files from `ops/systemd/` to `/etc/systemd/system/`, runs `daemon-reload`, enables every unit with an `[Install]` section **except those in `OPTIONAL_UNITS`** (see below) |
@@ -100,7 +100,7 @@ The Makefile honors standard variables for non-default installs and packagers:
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `PREFIX` | `/usr/local` | Where `hippocampus`, `memory-governor`, `sacred-search` live |
+| `PREFIX` | `/usr/local` | Where `hippocampus` and `memory-governor` live |
 | `SYSCONFDIR` | `/etc` | Parent of `sacred-brain/` config dir |
 | `DESTDIR` | (empty) | Stage all paths under this prefix (skips `systemctl` calls) |
 | `PIPX_HOME` | `/opt/pipx` | Where pipx puts the package's venv |
@@ -192,7 +192,6 @@ sudo make install OPTIONAL_UNITS="matrix-bot.service litellm-compose.service"
 /usr/local/bin/agent-memory-prune
 /usr/local/bin/agent-memory-tune
 /usr/local/bin/agent-memory-notes
-/usr/local/bin/agent-memory-search
 /usr/local/share/agent-memory/docs/       ← docs as installed data
 /etc/agent-memory/                        ← configuration (not in repo)
     hippocampus.toml

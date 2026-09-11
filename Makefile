@@ -109,11 +109,12 @@ install-package:
 
 # ── Phase: shell scripts on PATH ────────────────────────────────────
 
+# agent-memory-search (and its legacy `sacred-search` alias) is NOT shipped
+# from this repo any more: the single implementation lives in agent-config
+# (bin/agent-memory-search), which is installed fleet-wide and reaches the
+# store over the tailnet. This target is kept as a no-op for muscle memory.
 install-bin:
-	@echo "  [+] Installing shell utilities to $(BIN_DIR)"
-	install -d -m 0755 $(BIN_DIR)
-	install -m 0755 scripts/agent-memory-search $(BIN_DIR)/agent-memory-search
-	install -m 0755 scripts/sacred-search $(BIN_DIR)/sacred-search
+	@echo "  [+] agent-memory-search is provided by agent-config (bin/agent-memory-search); nothing to install here"
 
 # ── Phase: systemd units ────────────────────────────────────────────
 
@@ -216,7 +217,7 @@ uninstall:
 	done
 	@if [ -z "$(DESTDIR)" ]; then systemctl daemon-reload; fi
 	@echo "  [+] Removing shell utilities from $(BIN_DIR)"
-	@rm -f $(BIN_DIR)/agent-memory-search $(BIN_DIR)/sacred-search
+	@rm -f $(BIN_DIR)/agent-memory-search $(BIN_DIR)/sacred-search  # pre-2026-09 installs
 	@echo "  [+] Uninstalling Python package"
 	@PIPX_HOME=$(PIPX_HOME) PIPX_BIN_DIR=$(PIPX_BIN_DIR) \
 	    pipx uninstall $(APP_NAME) 2>/dev/null || true
