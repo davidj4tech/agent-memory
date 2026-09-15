@@ -54,7 +54,7 @@ HIPPOCAMPUS_URL=http://127.0.0.1:54321
 HIPPOCAMPUS_API_KEY=hippo_local_a58b583f7a844f0eb3bc02e58d56f5bd
 LITELLM_BASE_URL=http://127.0.0.1:4000
 LITELLM_API_KEY=
-MG_STREAM_ENABLE=false
+MG_STREAM_ENABLE=true   # feeds the dream sweep's REM reflection (see docs/DREAMING.md); off = dream sees no conversation
 MG_STREAM_TTL_DAYS=14
 MG_WORKING_TTL_HOURS=24
 MG_ROOMS_SCOPE=room
