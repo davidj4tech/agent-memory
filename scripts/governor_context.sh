@@ -4,6 +4,17 @@
 #
 # Usage:
 #   governor_context.sh --target claude|opencode|codex|agents [--scope <path>] [--k 20] [--out <path>]
+#   governor_context.sh --hook [--k 12]
+#
+# `--hook` is the Claude Code SessionStart mode: it recalls by *query* (the
+# project name), not by scope filter — stored scope paths rarely match the
+# cwd basename, which is why the scoped form returned nothing for months —
+# and prints the memories as hookSpecificOutput.additionalContext JSON so
+# Claude actually receives them (Claude Code never loads .claude/CONTEXT_MEMORY.md
+# on its own). The markdown is also cached under
+# ~/.local/state/agent-memory/context/<project>.md instead of inside the repo.
+# Going through the Governor's /recall also records recall_stats, which is what
+# the nightly dream sweep needs before it can promote anything.
 #
 # `agents` is the canonical agent-neutral target (writes to .agents/CONTEXT_MEMORY.md).
 # `opencode` and `codex` are aliases for `agents`. `claude` writes to .claude/CONTEXT_MEMORY.md.
@@ -18,6 +29,7 @@ SCOPE=""
 K=20
 OUT=""
 TIMEOUT=2
+HOOK=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -25,6 +37,7 @@ while [[ $# -gt 0 ]]; do
     --scope)  SCOPE="$2";  shift 2 ;;
     --k)      K="$2";      shift 2 ;;
     --out)    OUT="$2";    shift 2 ;;
+    --hook)   HOOK=1; TARGET="claude"; K=12; shift ;;
     -h|--help)
       sed -n '2,10p' "$0" >&2
       exit 0
@@ -48,10 +61,21 @@ done
 
 GOVERNOR_URL="${AGENT_MEMORY_GOVERNOR_URL:-${GOVERNOR_URL:-${HIPPOCAMPUS_URL:-http://127.0.0.1:54323}}}"
 API_KEY="${AGENT_MEMORY_API_KEY:-${GOVERNOR_API_KEY:-${HIPPOCAMPUS_API_KEY:-}}}"
-USER_ID="${AGENT_MEMORY_USER_ID:-${GOVERNOR_USER_ID:-sam}}"
+USER_ID="${AGENT_MEMORY_USER_ID:-${GOVERNOR_USER_ID:-ryer}}"
 
 PROJECT="$(basename "$PWD")"
 SCOPE="${SCOPE:-project:$PROJECT/user:$USER_ID}"
+if [[ $HOOK -eq 1 ]]; then
+  # Hook JSON on stdin carries cwd; prefer it over $PWD.
+  HOOK_CWD="$(python3 -c 'import json,sys
+try: print(json.load(sys.stdin).get("cwd") or "")
+except Exception: print("")' 2>/dev/null)"
+  [[ -n "$HOOK_CWD" ]] && PROJECT="$(basename "$HOOK_CWD")"
+  QUERY="$PROJECT"
+  REPO="$(git -C "${HOOK_CWD:-$PWD}" remote get-url origin 2>/dev/null | sed -E 's#.*[/:]([^/]+)/([^/]+?)(\.git)?$#\2#')"
+  [[ -n "$REPO" && "$REPO" != "$PROJECT" ]] && QUERY="$PROJECT $REPO"
+  OUT="${XDG_STATE_HOME:-$HOME/.local/state}/agent-memory/context/${PROJECT}.md"
+fi
 
 case "$TARGET" in
   claude)                  OUT="${OUT:-.claude/CONTEXT_MEMORY.md}" ;;
@@ -72,6 +96,11 @@ for kind, sid in reversed([s.split(":", 1) for s in segs]):
 print(json.dumps(scope))
 ' "$SCOPE" 2>/dev/null)" || { echo "scope parse failed: $SCOPE" >&2; exit 0; }
 
+if [[ $HOOK -eq 1 ]]; then
+  REQ_BODY="$(QUERY="$QUERY" USER_ID="$USER_ID" K="$K" python3 -c 'import json,os
+print(json.dumps({"user_id": os.environ["USER_ID"], "query": os.environ["QUERY"], "k": int(os.environ["K"]),
+                  "filters": {"min_confidence": 0.5}}))')"
+else
 REQ_BODY="$(cat <<EOF
 {
   "user_id": "$USER_ID",
@@ -84,6 +113,7 @@ REQ_BODY="$(cat <<EOF
 }
 EOF
 )"
+fi
 
 HDRS=(-H "Content-Type: application/json")
 [[ -n "$API_KEY" ]] && HDRS+=(-H "X-API-Key: $API_KEY")
@@ -121,4 +151,12 @@ else:
 ' 2>/dev/null)" || exit 0
 
 printf '%s\n' "$FORMATTED" > "$OUT"
+
+if [[ $HOOK -eq 1 ]]; then
+  # Nothing recalled: stay silent rather than injecting an empty section.
+  if printf '%s' "$FORMATTED" | grep -q '_(no memories for this scope yet)_'; then exit 0; fi
+  FORMATTED="$FORMATTED" python3 -c 'import json,os
+print(json.dumps({"hookSpecificOutput": {"hookEventName": "SessionStart",
+                  "additionalContext": os.environ["FORMATTED"]}}))'
+fi
 exit 0

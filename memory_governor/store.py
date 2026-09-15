@@ -12,6 +12,28 @@ from memory_governor.schemas import ObserveRequest, Scope
 from memory_governor.scopes import scope_path
 
 
+def _word_trigrams(text: str) -> set[tuple[str, ...]]:
+    words = text.split()
+    if len(words) < 3:
+        return {tuple(words)} if words else set()
+    return {tuple(words[i : i + 3]) for i in range(len(words) - 2)}
+
+
+def near_duplicate(a: str, b: str, threshold: float = 0.8) -> bool:
+    """True when the word-trigram Jaccard similarity of a and b >= threshold."""
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    ta, tb = _word_trigrams(a), _word_trigrams(b)
+    if not ta or not tb:
+        return False
+    inter = len(ta & tb)
+    if inter == 0:
+        return False
+    return inter / len(ta | tb) >= threshold
+
+
 def _clamp_confidence(val: float) -> float:
     if val < 0.0:
         return 0.0
@@ -27,6 +49,9 @@ def _scope_key(scope: Scope) -> str:
 
 class WorkingStore:
     """SQLite-backed working/stream memory store with dedupe."""
+
+    NEAR_DUP_JACCARD = 0.8
+    NEAR_DUP_SCAN_LIMIT = 200
 
     def __init__(self, db_path: Path, ttl_hours: int = 24) -> None:
         self.db_path = db_path
@@ -179,7 +204,7 @@ class WorkingStore:
         if not memory_id:
             return
         ts = int(now_ts or time.time())
-        day = time.strftime("%Y-%m-%d", time.gmtime(ts))
+        day = time.strftime("%Y-%m-%d", time.localtime(ts))  # local day, matches dream file dates
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(
                 """
@@ -547,6 +572,21 @@ class WorkingStore:
                 (event.user_id, normalized, dedupe_cutoff),
             ).fetchone()
             if existing_norm:
+                return False
+            # Near-duplicate dedupe: several agents narrating the same work
+            # (relay fan-out, a Stop post followed by a SessionEnd repost)
+            # produce texts that differ by a few words. Treat >= NEAR_DUP_JACCARD
+            # word-trigram overlap with any same-user event in the window as
+            # the same observation.
+            recent = conn.execute(
+                """
+                SELECT normalized_text FROM working_events
+                WHERE user_id=? AND ts>=? AND normalized_text IS NOT NULL
+                ORDER BY id DESC LIMIT ?
+                """,
+                (event.user_id, dedupe_cutoff, self.NEAR_DUP_SCAN_LIMIT),
+            ).fetchall()
+            if any(near_duplicate(normalized, row[0], self.NEAR_DUP_JACCARD) for row in recent):
                 return False
             conn.execute(
                 """

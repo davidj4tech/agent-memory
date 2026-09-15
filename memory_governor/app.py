@@ -22,6 +22,8 @@ from memory_governor.mem_policy import (
 )
 from memory_governor.scopes import matches_filter, scope_path as _scope_path
 from memory_governor.schemas import (
+    RecallHitRequest,
+    RecallHitResponse,
     ConsolidateRequest,
     ConsolidateResponse,
     ObserveRequest,
@@ -460,6 +462,28 @@ async def recall(payload: RecallRequest) -> RecallResponse:
         for item in top_items
     ]
     return RecallResponse(results=results)
+
+
+@app.post("/recall_hit", response_model=RecallHitResponse)
+async def recall_hit(payload: RecallHitRequest) -> RecallHitResponse:
+    """Bump recall_stats for memories a client already showed the user.
+
+    agent-memory-search reads Hippocampus directly (to keep the ChatGPT
+    archive namespace visible), so without this the dream sweep never sees
+    those recalls and nothing can pass min_recall_count.
+    """
+    query_hash = (
+        hashlib.sha1(payload.query.strip().lower().encode("utf-8")).hexdigest()[:16]
+        if payload.query.strip()
+        else None
+    )
+    seen: set[str] = set()
+    for mid in payload.memory_ids:
+        if not mid or mid in seen:
+            continue
+        seen.add(mid)
+        runtime.enqueue_recall_hit(mid, query_hash=query_hash)
+    return RecallHitResponse(recorded=len(seen))
 
 
 @app.get("/outcome_stats")

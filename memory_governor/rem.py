@@ -258,7 +258,9 @@ def format_dream_entry(
     oracle: dict[str, Any] | None = None,
 ) -> str:
     """Wrap the model reply with YAML frontmatter."""
-    date = time.strftime("%Y-%m-%d", time.gmtime(inputs.now_ts or time.time()))
+    # Local date, not UTC: the sweep runs at 03:00 local, and a UTC name would
+    # file it under the previous day (and a daytime re-run would overwrite it).
+    date = time.strftime("%Y-%m-%d", time.localtime(inputs.now_ts or time.time()))
     lines = [
         "---",
         f"date: {date}",

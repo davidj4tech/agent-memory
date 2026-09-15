@@ -247,6 +247,8 @@ Storage: `<state_dir>/oracle/natal/<user_id>.json`. Disable globally with
 `MG_ORACLE_ENABLED=0`. The astrology call is wrapped in try/except — a
 broken kerykeion install never blocks the sweep.
 
+Dream entries are named by the **local** date of the run (since 2026-09-16; earlier files were UTC-dated, so a 03:00 Melbourne run filed under the previous day).
+
 > **Pin kerykeion to the 5.x line.** kerykeion 6 removed `AstrologicalSubject`
 > (factory API, fewer active points, narrower orbs), so the oracle reports
 > `astro_mode: unavailable` under it. Install with

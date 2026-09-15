@@ -64,6 +64,22 @@ class RecallRequest(BaseModel):
     filters: RecallFilters = Field(default_factory=RecallFilters)
 
 
+class RecallHitRequest(BaseModel):
+    """Record that a client surfaced these memories to a user/agent.
+
+    For readers that query Hippocampus directly (agent-memory-search) and so
+    bypass POST /recall, which is where recall_stats normally get written.
+    """
+
+    memory_ids: list[str]
+    query: str = ""
+    user_id: str | None = None
+
+
+class RecallHitResponse(BaseModel):
+    recorded: int
+
+
 class RecallItem(BaseModel):
     text: str
     kind: str | None = None
