@@ -247,6 +247,15 @@ Storage: `<state_dir>/oracle/natal/<user_id>.json`. Disable globally with
 `MG_ORACLE_ENABLED=0`. The astrology call is wrapped in try/except — a
 broken kerykeion install never blocks the sweep.
 
+> **Pin kerykeion to the 5.x line.** kerykeion 6 removed `AstrologicalSubject`
+> (factory API, fewer active points, narrower orbs), so the oracle reports
+> `astro_mode: unavailable` under it. Install with
+> `pipx inject agent-memory 'kerykeion<6'`; the venv is not tracked by
+> pyproject, so re-inject after any venv rebuild (this bit us on the 2026-08-11
+> rename, silently, for five weeks). Natal data is keyed by the dream user id
+> (`governor/oracle/natal/<user>.json`) — `ryer` must carry the full chart,
+> not a date-only stub, or the transit chart is partial.
+
 ## Relation to `/consolidate`
 
 The existing hourly `/consolidate` timer (rule-based keyword bucketing) is
