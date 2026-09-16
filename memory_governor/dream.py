@@ -120,7 +120,10 @@ def dreams_target_for_today(
     """
     if base.suffix == ".md":
         return base, None
-    day = today or time.strftime("%Y-%m-%d", time.gmtime())
+    # Local date, matching the entry's own `date:` frontmatter (rem.py). A UTC
+    # name filed a 03:00-Melbourne run under the previous day, so the file and
+    # its contents disagreed and a same-day re-run overwrote the night's dream.
+    day = today or time.strftime("%Y-%m-%d", time.localtime())
     return base / f"{day}.md", base / "latest.md"
 
 
