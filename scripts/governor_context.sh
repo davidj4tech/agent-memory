@@ -54,7 +54,11 @@ fi
 # Load env from standard locations (first hit wins)
 for f in "$HOME/.config/hippocampus.env" "$HOME/.config/agent-memory.env"; do
   if [[ -r "$f" ]]; then
-    set -a; . "$f"; set +a
+    set -a
+    # Runtime-selected env file; ShellCheck cannot resolve the path statically.
+    # shellcheck disable=SC1090
+    . "$f"
+    set +a
     break
   fi
 done

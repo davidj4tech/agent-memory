@@ -39,7 +39,11 @@ END_MIN_WORDS="${GOVERNOR_END_MIN_WORDS:-20}"
 
 for f in "$HOME/.config/hippocampus.env" "$HOME/.config/agent-memory.env"; do
   if [[ -r "$f" ]]; then
-    set -a; . "$f"; set +a
+    set -a
+    # Runtime-selected env file; ShellCheck cannot resolve the path statically.
+    # shellcheck disable=SC1090
+    . "$f"
+    set +a
     break
   fi
 done
