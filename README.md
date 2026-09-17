@@ -1,19 +1,24 @@
-# Sacred Brain – Hippocampus Service (v0)
+# agent-memory
 
-A lightweight FastAPI microservice that wraps a Mem0 memory backend and exposes
-simple HTTP endpoints for storing, querying, and summarising memories.
+Persistent long-term memory and memory-lifecycle services for AI assistants.
+
+The repo has two main layers:
+
+- **Hippocampus** is the storage and retrieval service. It exposes a small HTTP API over Mem0, with local SQLite/in-memory fallbacks.
+- **Memory Governor** is the policy layer in front of it. It decides what should become durable memory, tracks recall and outcome signals, consolidates working observations, and drives the dreaming/reflection lifecycle.
+
+Older docs and service names may still use **Sacred Brain**; that is the historical deployment name, while `agent-memory` is the repository and subsystem boundary.
 
 ## Features
 
-- Store “experiences” (text + metadata) per user.
-- Query user memories using semantic/full-text lookups via Mem0.
-- Delete memories when they are no longer relevant.
-- Summarise multiple memories into a compact form.
-- Designed for self-hosted Mem0 deployments on a private LAN/Tailscale network.
-- Automatically falls back to the local in-memory store (or optional SQLite mode) when Mem0 is unreachable.
-- Minimal configuration via TOML + environment variables.
-- Ready-to-run with `uvicorn`, includes tests and ops scaffolding.
-- Optional “bias signals” for Sam via astrology metadata (see `docs/SAM_ASTROLOGY.md`).
+- Store and semantically retrieve durable memories with provenance and metadata.
+- Observe high-volume agent activity without turning the memory store into a transcript archive.
+- Promote, consolidate, rerank, prune, and protect memories using recall, relevance, recency, query diversity, confidence, and outcome signals.
+- Keep short-lived working observations separate from durable memory.
+- Run nightly dreaming/reflection over recent activity and recalled memories.
+- Fall back to local SQLite or in-memory storage when the configured Mem0 backend is unavailable.
+- Expose CLI, HTTP, MCP, hook, bot, and file/org integration surfaces without making any one agent harness the source of truth.
+- Include pytest coverage for the Hippocampus API, Governor, dreaming, recall statistics, scopes, routing, and related lifecycle behaviour.
 
 ## Getting Started
 
@@ -140,10 +145,11 @@ python scripts/mem0_org_sync.py import --dir data/memories-denote --user alice
 Files are idempotent and get `:MEM0_ID:`/`:ID:` properties so repeated syncs do
 not duplicate. See `docs/MEM0_ORG_ROAM.md` for the format and options.
 
-## LiteLLM gateway (canonical)
-- Route all model traffic through LiteLLM and configure OpenWebUI (if used) to
-  point at LiteLLM instead of providers directly. See `docs/LITELLM_GATEWAY.md`.
-- Hippocampus stays independent; clients call `/memories` directly.
+## Model gateway boundary
+
+`agent-memory` does not own provider routing. Optional LLM-backed summarisation, reflection, and related jobs talk to an OpenAI-compatible endpoint; the fleet's canonical routing and provider ownership live in [`agent-gateway`](https://github.com/davidj4tech/agent-gateway).
+
+Hippocampus and the Governor remain independent services: callers use their memory APIs directly, and changing the model gateway does not change the memory store. Legacy LiteLLM notes remain under `docs/` as deployment/history references.
 
 ## Logging to Hippocampus
 - Client-agnostic logging examples (curl/Python) are in `docs/LOGGING_TO_HIPPOCAMPUS.md`.
@@ -153,11 +159,11 @@ not duplicate. See `docs/MEM0_ORG_ROAM.md` for the format and options.
 
 See `docs/MEMORY_GOVERNOR.md` for the Agno/Mem0-based decision layer in front of Hippocampus, including setup, systemd units, and smoke tests.
 
-## Next Steps
+## Current edges
 
-- Add authentication and per-caller access control.
-- Replace the naive summary helper with an LLM-backed summariser.
-- Expand metrics/observability once the core API is validated.
+- Continue hardening authentication and per-caller access control before broader multi-user deployment.
+- Keep the Governor/Hippocampus boundary explicit as lifecycle policy evolves.
+- Consolidate older Sacred Brain and LiteLLM-era documentation as the current deployment shape settles.
 
 
 ## Matrix Bot
