@@ -80,7 +80,10 @@ def walk_memories(root: Path) -> list[ParsedMemory]:
         try:
             raw = md.read_text(encoding="utf-8")
             meta, body = parse_frontmatter(raw)
-            type_ = str(meta.get("type") or "project")
+            # Claude Code writes the type under `metadata:`; older files
+            # have it at the top.
+            nested = meta.get("metadata") if isinstance(meta.get("metadata"), dict) else {}
+            type_ = str(meta.get("type") or nested.get("type") or "project")
             if type_ not in TYPE_MAP:
                 # unknown type — default to project/episodic
                 type_ = "project"
